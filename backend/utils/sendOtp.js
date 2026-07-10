@@ -1,4 +1,4 @@
-import Transpoter from "./email";
+import Transpoter from "./email.js";
 
 const sendOtp = async(otp,email)=>{
     try{
@@ -6,7 +6,7 @@ const sendOtp = async(otp,email)=>{
             from:process.env.EMAIL,
             to:email,
             subject:"Your Otp Code",
-            html = `
+            html : `
 <div style="margin:0; padding:40px 20px; background:#f4f7fb; font-family:Arial, Helvetica, sans-serif;">
     <div style="max-width:500px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
 
