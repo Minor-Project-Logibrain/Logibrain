@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Navbar from "../components/NavBar";
 import Hero from "../components/Hero";
 import Trust from "../components/Trust";
 import Footer from "../components/Footer";

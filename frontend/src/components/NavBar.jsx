@@ -7,6 +7,7 @@ const navLinks = [
   "About",
 ];
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
@@ -14,14 +15,14 @@ const Navbar = () => {
 
         {/* Logo */}
 
-        <div className="flex items-center gap-3">
-  <img
-    src={logo}
-    alt="TripFlow Logo"
-    className="h-10 w-auto object-contain"
-  />
-  <h2 className="text-2xl font-bold">TripFlow</h2>
-</div>
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src={logo}
+            alt="LogiBrain Logo"
+            className="h-10 w-auto object-contain"
+          />
+          <h2 className="text-2xl font-bold text-slate-900">LogiBrain</h2>
+        </Link>
 
         {/* Navigation */}
 
@@ -31,11 +32,10 @@ const Navbar = () => {
             <a
               key={item}
               href="#"
-              className={`transition ${
-                item === "Features"
-                  ? "text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }`}
+              className={`transition font-medium ${item === "Features"
+                ? "text-blue-600 font-semibold"
+                : "text-slate-600 hover:text-blue-600"
+                }`}
             >
               {item}
             </a>
@@ -47,13 +47,12 @@ const Navbar = () => {
 
         <div className="flex items-center gap-4">
 
-          <button className="hidden md:block text-gray-600 hover:text-blue-600">
+          <Link to='/login' className="hidden md:block font-medium text-slate-600 hover:text-blue-600 transition">
             Login
-          </button>
-
-          <button className="bg-black text-white px-5 py-2 rounded-lg hover:opacity-90 transition">
+          </Link>
+          <Link to='/login' className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
             Get Started
-          </button>
+          </Link>
 
         </div>
 

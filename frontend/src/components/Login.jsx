@@ -1,48 +1,117 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faLock,faEye,faEyeSlash, } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { Link } from 'react-router-dom';
+import Logo from "../assets/logo.png";
+import "./Login.css";
 
+function Login() {
+  const [showpass, setShowpass] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [message, setMessage] = useState('');
+  const [success, setSuccess] = useState(false);
 
-const Login = () => {
-  const [showpass,setShowpass] = useState(false);
-  const toggel = ()=>{
-  setShowpass(!showpass);
-}
+  const togglePassword = () => {
+    setShowpass(!showpass);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
   return (
-    <div>
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="w-full max-w-md bg-white font-bold rounded-2xl shadow-xl p-8">
-            <h1 className="font-bold text-3xl text-center text-gray-800">Welcome Back</h1>
-            <p className="mt-2 text-center text-gray-500 ">Login to your account</p>
-            <form className="mt-8 space-y-5">
-                <div>
-                    <label htmlFor="" className="text-sm mb-2 block text-gray-700 ">Email</label>
-                    <input type="email" className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"/>
-                </div>
-                <div className="logo">
-                  <img src="" alt="" />
-                </div>
-                <div>
-                    <label htmlFor="" className="text-sm block text-gray-700 mb-2">Password</label>
-                    <div className="relative">
-                      <input type={showpass?'text':'password'} className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" />
-                      <FontAwesomeIcon icon={showpass ? faEyeSlash:faEye} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer" onClick={toggel}/>
-                    </div>
-                </div>
-                
-                <div className='text-ceter'>
-                    <button className='w-full text-white bg-blue-500 py-3 rounded-lg hover:bg-blue-700 transition'>Login</button>
-                </div>
-                <div className='flex items-center justify-between text-sm'>
-                    <a href="" className='text-blue-500 hover:underline'>Forgot Password?</a>
-                    <p className='text-gray-600'>Don't have a account? {" "}<a className='text-blue-600 font-semibold'>Sign-up</a></p>
-                </div>
-            </form>
-        </div>
+    <div className="login-wrapper">
+      {/* Back to Home Link */}
+      <div className="login-header-nav">
+        <Link to="/" className="back-link">
+          <FontAwesomeIcon icon={faArrowLeft} />
+          <span>Back to Home</span>
+        </Link>
+      </div>
 
+      {/* Centered Login Card */}
+      <div className="login-box-container">
+        <div className="login-card">
+          <div className="card-brand">
+            <img src={Logo} alt="LogiBrain Logo" className="card-logo" />
+            <h1 className="card-title">LogiBrain</h1>
+          </div>
+
+          <div className="card-header-text">
+            <h2>Welcome Back</h2>
+            <p>Please enter your details to sign in</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="email">Email or Fleet ID</label>
+              <input
+                id="email"
+                type="text"
+                placeholder="Enter your email or fleet ID"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <div className="label-row">
+                <label htmlFor="password">Password</label>
+                <Link to="/forgot-password" className="forgot-password">
+                  Forgot Password?
+                </Link>
+              </div>
+
+              <div className="password-input-box">
+                <input
+                  id="password"
+                  type={showpass ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="pass-toggle"
+                  onClick={togglePassword}
+                  aria-label="Toggle password visibility"
+                >
+                  <FontAwesomeIcon icon={showpass ? faEyeSlash : faEye} />
+                </button>
+              </div>
+            </div>
+
+            <div className="remember-row">
+              <label className="remember-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span>Remember me</span>
+              </label>
+            </div>
+
+            <button type="submit" className="submit-login-btn">
+              Login
+            </button>
+          </form>
+
+          <div className="card-footer">
+            <p>Don't have an account? <Link to="/signup" className="signup-link">Sign up</Link></p>
+          </div>
+        </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;
+
+
+
+
