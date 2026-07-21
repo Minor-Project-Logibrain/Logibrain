@@ -47,9 +47,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-4">
 
-          <Link to='/login' className="hidden md:block font-medium text-slate-600 hover:text-blue-600 transition">
-            Login
-          </Link>
+
           <Link to='/login' className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
             Get Started
           </Link>

@@ -1,5 +1,5 @@
 import DashboardPreview from "./DashboardPreview";
-
+import { Link } from "react-router-dom";
 const Hero = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-blue-100 pt-20 pb-32">
@@ -24,15 +24,9 @@ const Hero = () => {
 
         <div className="flex flex-col sm:flex-row justify-center gap-5 mt-12">
 
-          <button className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition">
-
-            Start Free Trial
-
-            <span className="material-symbols-outlined">
-              arrow_forward
-            </span>
-
-          </button>
+          <Link to='/ask-role' className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm align-center pt-4">
+            Get Started
+          </Link>
 
           <button className="border border-gray-300 bg-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 transition">
 

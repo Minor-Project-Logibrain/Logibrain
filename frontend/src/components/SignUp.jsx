@@ -13,6 +13,7 @@ function Signup() {
     const [company, setCompany] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [phone, setPhone] = useState('');
 
     const togglePassword = () => {
         setShowpass(!showpass);
@@ -82,6 +83,17 @@ function Signup() {
                                 placeholder="e.g. Apex Logistics Corp"
                                 value={company}
                                 onChange={(e) => setCompany(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="company">Phone Number</label>
+                            <input
+                                id="phone"
+                                type="text"
+                                placeholder="e.g. 9876543210"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
                                 required
                             />
                         </div>
