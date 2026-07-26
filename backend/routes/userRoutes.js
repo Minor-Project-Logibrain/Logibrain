@@ -89,6 +89,7 @@ router.post("/verify-signup-otp", errorHandler(async (req, res) => {
         userName: userData.userName,
         otp: userData.otp,
         otpExpiry: userData.otpExpiry,
+        role: "Owner",
     });
     const token = generateToken(newUser._id);
     res.cookie("token", token, {
@@ -103,7 +104,7 @@ router.post("/verify-signup-otp", errorHandler(async (req, res) => {
         message: "Otp verified",
     });
 }));
-router.post("/login", errorHandler(async (req, res) => {
+router.post("/login/driver", errorHandler(async (req, res) => {
     const { phone, email, password } = req.body;
     if (!email || !password || !phone) {
         return res.status(501).json({
@@ -160,6 +161,47 @@ router.post("/login", errorHandler(async (req, res) => {
     return res.status(200).json({
         success: true,
         message: "User is Logged in successfully",
+    });
+}));
+
+router.post("/login/Owner", errorHandler(async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(501).json({
+            success: false,
+            message: "All the fields are Required",
+        });
+    }
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+        return res.status(501).json({
+            success: false,
+            message: "User is not existing",
+        });
+    };
+    const compair = await bcrypt.compare(password, existingUser.password);
+    if (!compair) {
+        return res.status(501).json({
+            success: false,
+            message: "Password is incorrect",
+        });
+    };
+    const otp = generateOtp();
+    await sendOtp(otp, email);
+    const hashedOtp = await bcrypt.hash(otp, 5);
+    await User.updateOne(email, {
+        otp: hashedOtp,
+        otpExpiry: Date.now() + 5 * 60 * 1000,
+        role: "Owner",
+    });
+    res.cookie("email", email, {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "strict",
+    });
+    return res.status(200).json({
+        success: true,
+        message: "Email is verified",
     });
 }));
 
