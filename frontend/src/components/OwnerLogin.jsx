@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faArrowLeft, faL } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import "./OwnerLogin.css";
-import Logo from "../assets/logo.png"
+import Logo from "../assets/logo.png";
+import axios from "axios";
+import useCooldown from "../hooks/useCooldown";
+import Message from "./Message";
 
 export default function OwnerLogin() {
+    const { isDisable, cooldown, startCooldown } = useCooldown(10);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showpass, setShowpass] = useState(false);
@@ -16,9 +20,36 @@ export default function OwnerLogin() {
     const togglePassword = () => {
         setShowpass(!showpass);
     }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (isDisable) return;
+        startCooldown();
+        try {
+            const res = await axios.post('http://localhost:8080/owner/login', {
+                email,
+                password,
+            });
+            if (!res.data.success) {
+                setMessage(res.data.message);
+                setSuccess(false);
+                return;
+            }
+            setMessage("Login successfully" || res.data.message);
+            setSuccess(true);
+            localStorage.setItem("role", "owner");
+            navigate("/owner/dashboard");
+
+
+        } catch (err) {
+            setMessage(err.message || "Something went wrong!");
+            setSuccess(false);
+        }
+    }
 
     return (
         <div className="login-wrapper">
+            <Message message={message} success={success} />
+
             {/* Back to Home Link */}
             <div className="login-header-nav">
                 <Link to="/" className="back-link">
@@ -92,8 +123,8 @@ export default function OwnerLogin() {
                             </label>
                         </div>
 
-                        <button type="submit" className="submit-login-btn">
-                            Login
+                        <button type="submit" className={isDisable ? "submit-login-btn-disabled" : "submit-login-btn"} disabled={isDisable} onClick={handleSubmit}>
+                            {isDisable ? `Wait ${cooldown}s` : "Login"}
                         </button>
                     </form>
 

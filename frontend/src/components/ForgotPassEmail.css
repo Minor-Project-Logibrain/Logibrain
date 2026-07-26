@@ -1,0 +1,205 @@
+/* CSS for Forgot Password Email verification page */
+
+.forgot-pass-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    color: #0f172a;
+    position: relative;
+}
+
+.forgot-pass-header-nav {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: 10;
+}
+
+.forgot-pass-back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.forgot-pass-back-link:hover {
+    color: #2563eb;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+}
+
+.forgot-pass-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.forgot-pass-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    border: 1px solid #e2e8f0;
+    box-sizing: border-box;
+}
+
+.forgot-pass-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.forgot-pass-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.forgot-pass-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.forgot-pass-header-text {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.forgot-pass-header-text h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.forgot-pass-header-text p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.forgot-pass-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.forgot-pass-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.forgot-pass-form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.forgot-pass-input-box {
+    position: relative;
+    width: 100%;
+}
+
+.forgot-pass-input-box input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+    color: #0f172a;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.forgot-pass-input-box input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.forgot-pass-input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 15px;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.forgot-pass-input-box input:focus + .forgot-pass-input-icon {
+    color: #2563eb;
+}
+
+.forgot-pass-submit-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.forgot-pass-submit-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.forgot-pass-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #94a3b8;
+    box-shadow: none;
+}
+
+.forgot-pass-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #64748b;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.forgot-pass-login-link {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.forgot-pass-login-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .forgot-pass-card {
+        padding: 32px 20px;
+    }
+}

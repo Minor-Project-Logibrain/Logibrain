@@ -3,8 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { Link } from 'react-router-dom';
 import Logo from "../assets/logo.png";
+import axios from 'axios';
+import useCooldown from '../hooks/useCooldown';
+import { useNavigate } from 'react-router-dom';
 import "./Login.css";
-
+import Message from './Message';
 function Signup() {
     const [showpass, setShowpass] = useState(false);
     const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -14,6 +17,10 @@ function Signup() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [phone, setPhone] = useState('');
+    const { isDisable, startCooldown, cooldown } = useCooldown(10);
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
+    const navigate = useNavigate();
 
     const togglePassword = () => {
         setShowpass(!showpass);
@@ -23,8 +30,38 @@ function Signup() {
         setShowConfirmPass(!showConfirmPass);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isDisable) return;
+        try {
+            startCooldown();
+            const res = await axios.post("http://localhost:8080/signup", {
+                fullName,
+                email,
+                company,
+                phone,
+                password,
+                confirmPassword,
+            },
+                {
+                    withCredentials: true,
+                }
+            );
+            if (!res.data.success) {
+                setMessage(res.data.message);
+                setSuccess(false);
+            } else {
+                setMessage(res.data.message);
+                setSuccess(true);
+                setTimeout(() => {
+                    navigate('/otp');
+                }, 1000);
+            }
+        } catch (err) {
+            setMessage(err.response?.data?.message || err.message || "Something went wrong");
+            setSuccess(false);
+            return;
+        }
     };
 
     return (
@@ -39,6 +76,7 @@ function Signup() {
 
             {/* Centered Signup Card */}
             <div className="login-box-container">
+                <Message message={message} success={success} />
                 <div className="login-card">
                     <div className="card-brand">
                         <img src={Logo} alt="LogiBrain Logo" className="card-logo" />
@@ -142,13 +180,13 @@ function Signup() {
                             </div>
                         </div>
 
-                        <button type="submit" className="submit-login-btn">
-                            Create Account
+                        <button type="submit" className="submit-login-btn" onClick={handleSubmit} disabled={isDisable} style={{ cursor: isDisable ? "not-allowed" : "pointer" }}>
+                            {isDisable ? `Please wait ${cooldown} seconds` : "Create Account"}
                         </button>
                     </form>
 
                     <div className="card-footer">
-                        <p>Already have an account? <Link to="/login" className="signup-link">Log in</Link></p>
+                        <p>Already have an account? <Link to="/login?role=owner" className="signup-link">Log in</Link></p>
                     </div>
                 </div>
             </div>

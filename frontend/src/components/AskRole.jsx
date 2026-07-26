@@ -19,6 +19,7 @@ export default function AskRole() {
 
     const handleContinue = () => {
         if (!selectedRole) return;
+        localStorage.setItem("role", selectedRole);
         navigate(`/login?role=${selectedRole}`, { state: { role: selectedRole } });
     };
 

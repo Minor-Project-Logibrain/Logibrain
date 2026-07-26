@@ -1,4 +1,4 @@
-import {Router} from "express";
+import { Router } from "express";
 import redisClient from "../redis.js";
 import User from "../models/User.js";
 import sendOtp from "../utils/sendOtp.js";
@@ -10,185 +10,195 @@ const router = Router();
 
 
 
-router.post("/signup",errorHandler(async(req,res)=>{
-    const {email,password,username} = req.body;
-    if(!email || !password || !username){
+router.post("/signup", errorHandler(async (req, res) => {
+    const { fullName, company, phone, confirmPassword, email, password } = req.body;
+    if (!email || !password || !confirmPassword || !fullName || !company || !phone) {
         return res.status(501).json({
-            success:false,
-            message:"All fileds are required",
+            success: false,
+            message: "All fileds are required",
         });
     };
-    const existingUser = await User.findOne({email});
-    if(existingUser){
+    if (password !== confirmPassword) {
         return res.status(501).json({
-            success:false,
-            message:"The user is already existing",
+            success: false,
+            message: "The Password does not match",
+        });
+    };
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(403).json({
+            success: false,
+            message: "The user is already existing",
         });
     }
     const otp = generateOtp();
-    const hashedPass = await bcrypt.hash(password,10);
-    const hashedOtp = await bcrypt.hash(otp,5);
-    await sendOtp(otp,email);
+    const hashedPass = await bcrypt.hash(password, 10);
+    const hashedOtp = await bcrypt.hash(otp, 5);
+    await sendOtp(otp, email);
 
-    await redisClient.hset(`signup:${email}`,{
+    await redisClient.hset(`signup:${email}`, {
         email,
-        password:hashedPass,
-        otp:hashedOtp,
-        otpExpiry:Date.now() + 5*60*1000,
+        password: hashedPass,
+        otp: hashedOtp,
+        otpExpiry: Date.now() + 5 * 60 * 1000,
     });
-    await redisClient.expire(`signup:${email}`,600);
-    res.cookie('email',email,{
-        httpOnly:true,
-        maxAge:2 * 24 * 60 * 60 * 1000,
-        sameSite:"strict",
+    await redisClient.expire(`signup:${email}`, 600);
+    res.cookie('email', email, {
+        httpOnly: true,
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        sameSite: "strict",
     });
     return res.status(200).json({
-        success:true,
-        message:"User will Registerd after otp confirmation",
+        success: true,
+        message: "User will Registerd after otp confirmation",
     });
 }));
-router.post("/verify-signup-otp",errorHandler(async(req,res)=>{
-    const {otp} = req.body;
+router.post("/verify-signup-otp", errorHandler(async (req, res) => {
+    const { otp } = req.body;
     const email = req.cookies.email;
-    
-    if(!otp || !email){
+
+    if (!otp || !email) {
         return res.status(501).json({
-            success:false,
-            message:"All fileds are required",
+            success: false,
+            message: "All fileds are required",
         });
     };
     const userData = await redisClient.hgetall(`signup:${email}`);
-    if(!userData.email){
+    if (!userData.email) {
         return res.status(501).json({
-            success:false,
-            message:"The user data dose not exsist",
+            success: false,
+            message: "The user data dose not exsist",
         });
     };
-    const isOtpTrue = await bcrypt.compare(otp,userData.otp);
-    if(!isOtpTrue){
+    const isOtpTrue = await bcrypt.compare(otp, userData.otp);
+    if (!isOtpTrue) {
         return res.status(401).json({
-            success:false,
-            message:"The Otp is incorrect",
+            success: false,
+            message: "The Otp is incorrect",
         });
     };
-    if(userData.otpExpiry && Number(userData.otpExpiry) < Date.now()){
-        return  res.status(401).json({
-        success:false,
-        message:"The Otp is expired",
-    });
+    if (userData.otpExpiry && Number(userData.otpExpiry) < Date.now()) {
+        return res.status(401).json({
+            success: false,
+            message: "The Otp is expired",
+        });
     }
     const newUser = await User.create({
-        email:userData.email,
-        password:userData.password,
-        userName:userData.userName,
-        otp:userData.otp,
-        otpExpiry:userData.otpExpiry,
+        email: userData.email,
+        password: userData.password,
+        userName: userData.userName,
+        otp: userData.otp,
+        otpExpiry: userData.otpExpiry,
     });
     const token = generateToken(newUser._id);
-    res.cookie("token",token,{
-        httpOnly:true,
-        sameSite:"strict",
-        maxAge: 7 * 24 * 60 *60 *1000,
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     await redisClient.del(`signup:${email}`);
     res.clearCookie("email");
     return res.status(200).json({
-        success:true,
-        message:"Otp verified",
+        success: true,
+        message: "Otp verified",
     });
 }));
-router.post("/login",errorHandler(async(req,res)=>{
-    const {email,password} = req.body;
-    if(!email || !password ){
+router.post("/login", errorHandler(async (req, res) => {
+    const { phone, email, password } = req.body;
+    if (!email || !password || !phone) {
         return res.status(501).json({
-            success:false,
-            message:"All fileds are required",
+            success: false,
+            message: "All fileds are required",
         });
     };
-    const existingUser = await User.findOne({email});
-    if(!existingUser){
+    const isNum = /^[6-9][0-9]{9}$/;
+    if (!isNum.test(phone)) {
         return res.status(501).json({
-            success:false,
-            message:"The user dose not existing",
+            success: false,
+            message: "The Phone number is incorrect",
         });
     };
-    const isPasswordTrue = await bcrypt.compare(password,existingUser.password);
-    if(!isPasswordTrue){
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+        return res.status(501).json({
+            success: false,
+            message: "The user dose not existing",
+        });
+    };
+    const isPasswordTrue = await bcrypt.compare(password, existingUser.password);
+    if (!isPasswordTrue) {
         return res.status(401).json({
-            success:false,
-            message:"The Password is incorrect",
+            success: false,
+            message: "The Password is incorrect",
         });
     };
-    if(existingUser.role === "driver"){
+    if (existingUser.role === "driver") {
         const token = generateToken(existingUser._id);
-        return res.cookie("token",token,{
-            httpOnly:true,
-            sameSite:"strict",
-            maxAge: 7 *24 *60*60*1000,
+        return res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         }).status(200).json({
-            success:true,
-            message:"Diver Logged in successfully",
+            success: true,
+            message: "Diver Logged in successfully",
         });
     }
     const otp = generateOtp();
-    const hashedOtp = await bcrypt.hash(otp,5);
-    await sendOtp(otp,email);
-    await User.updateOne({email},{
-        otp:hashedOtp,
-        otpExpiry:Date.now() + 5*60*1000,
+    const hashedOtp = await bcrypt.hash(otp, 5);
+    await sendOtp(otp, email);
+    await User.updateOne({ email }, {
+        otp: hashedOtp,
+        otpExpiry: Date.now() + 5 * 60 * 1000,
+        role: "Driver",
     });
-    res.cookie('email',email,{
-        maxAge:2*24*60*60*1000,
-        sameSite:"strict",
-        httpOnly:true,
+    res.cookie('email', email, {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        sameSite: "strict",
+        httpOnly: true,
     });
-    
+
     return res.status(200).json({
-        success:true,
-        message:"User is Logged in successfully",
+        success: true,
+        message: "User is Logged in successfully",
     });
 }));
 
-router.post("/verify-login-otp",errorHandler(async(req,res)=>{
-    const {otp} = req.body;
+router.post("/verify-login-otp", errorHandler(async (req, res) => {
+    const { otp } = req.body;
     const email = req.cookies.email;
-    if(!email || !otp){
+    if (!email || !otp) {
         return res.status(501).json({
-            success:false,
-            message:"All filed are Required",
+            success: false,
+            message: "All filed are Required",
         });
     };
-    const existingUser = await User.findOne({email});
-    if(!existingUser){
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
         return res.status(501).json({
-            success:false,
-            message:"Invalid Request",
+            success: false,
+            message: "Invalid Request",
         });
     }
     const Otp = existingUser.otp;
-    const verifird = await bcrypt.compare(otp,Otp);
-    if(!verifird){
+    const verifird = bcrypt.compare(otp, Otp);
+    if (!verifird) {
         return res.status(400).json({
-            success:false,
-            message:"Otp is not wrong",
+            success: false,
+            message: "Otp is not wrong",
         });
     }
     const token = generateToken(existingUser._id);
-    res.cookie("token",token,{
-        httpOnly:true,
-        sameSite:"strict",
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.clearCookie("email");
     return res.status(200).json({
-        success:true,
-        message:"Otp verified successfully",
+        success: true,
+        message: "Otp verified successfully",
     });
 }));
 
-router.post("/test", (req, res) => {
-    res.cookie("test", "123");
-    res.send("Cookie set");
-});
 
 export default router;

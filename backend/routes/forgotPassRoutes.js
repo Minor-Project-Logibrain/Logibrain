@@ -1,11 +1,11 @@
 import {Router} from "express";
-import redisClient from "../redis";
-import User from "../models/User";
-import sendOtp from "../utils/sendOtp";
-import generateOtp from "../utils/generateOtp";
+import redisClient from "../redis.js";
+import User from "../models/User.js";
+import sendOtp from "../utils/sendOtp.js";
+import generateOtp from "../utils/generateOtp.js";
 import bcrypt from "bcrypt";
-import generateToken from "../utils/generateToken";
-import errorHandler from "../utils/ExpressError";
+import generateToken from "../utils/generateToken.js";
+import errorHandler from "../utils/ExpressError.js";
 const router = Router();
 router.post("/forgot/passhome-page",errorHandler(async(req,res)=>{
     const {email} = req.body;
@@ -61,10 +61,9 @@ router.post("/verify-forgot-pass-otp",errorHandler(async(req,res)=>{
     if(!verifird){
         return res.status(400).json({
             success:false,
-            message:"Otp is not wrong",
+            message:"Otp is incorrect",
         });
     }
-    res.clearCookie("email");
     return res.status(200).json({
         success:true,
         message:"Otp verified successfully",
@@ -103,8 +102,10 @@ router.post("/forgot-pass-set-new-pass",errorHandler(async(req,res)=>{
         sameSite:"strict",
         maxAge:7 * 24 *60*60*1000,
     });
+    res.clearCookie("email");
     return res.status(200).json({
         success:true,
+        message:"Password Updated Successfully",
         json:"Password Updated Successfully",
     });
 }));
