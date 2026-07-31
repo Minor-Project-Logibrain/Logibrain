@@ -1,6 +1,5 @@
-import express,{Router} from "express";
+import express from "express";
 import dotenv from "dotenv";
-import errorHandler from "./utils/ExpressError.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
@@ -12,20 +11,25 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
     origin: (origin, callback) => callback(null, true),
-    credentials: true
-}));
+    credentials: true,
+}))
 
-app.use("/auth",userRoutes);
-app.use("/",forgotPassRoutes);
-app.use((err,req,res,next)=>{
+app.get("/", (req, res) => {
+    res.send("App is live");
+});
+
+app.use("/auth", userRoutes);
+app.use("/forgotPass", forgotPassRoutes);
+
+app.use((err, req, res, next) => {
     console.log(err);
     res.status(501).json({
-        success:false,
-        message:err.message,
+        success: false,
+        message: err.message,
     });
-    
+
 });
-app.listen(port,()=>{
+app.listen(port, () => {
     console.log("App is live");
-    
+
 });
