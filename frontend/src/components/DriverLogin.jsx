@@ -25,10 +25,12 @@ export default function DriverLogin() {
         if (isDisable) return;
         startCooldown();
         try {
-            const res = await axios.post('http://localhost:8080/driver/login', {
+            const res = await axios.post('http://localhost:8080/auth/login/driver', {
                 email,
                 phone,
                 password,
+            }, {
+                withCredentials: true
             });
             if (!res.data.success) {
                 setMessage(res.data.message);

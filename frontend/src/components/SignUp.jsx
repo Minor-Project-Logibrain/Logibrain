@@ -35,11 +35,11 @@ function Signup() {
         if (isDisable) return;
         try {
             startCooldown();
-            const res = await axios.post("http://localhost:8080/signup", {
+            const res = await axios.post("http://localhost:8080/auth/signup", {
                 fullName,
-                email,
                 company,
                 phone,
+                email,
                 password,
                 confirmPassword,
             },
@@ -54,11 +54,11 @@ function Signup() {
                 setMessage(res.data.message);
                 setSuccess(true);
                 setTimeout(() => {
-                    navigate('/otp');
+                    navigate('/signup-otp');
                 }, 1000);
             }
         } catch (err) {
-            setMessage(err.response?.data?.message || err.message || "Something went wrong");
+            setMessage("Something went wrong");
             setSuccess(false);
             return;
         }

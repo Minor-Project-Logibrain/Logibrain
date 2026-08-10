@@ -73,10 +73,10 @@ export default function Otp() {
         let url = '';
         let redirect = '/dashboard';
         if (location.pathname === "/signup-otp") {
-            url = 'http://localhost:8080/signup/verify';
+            url = 'http://localhost:8080/auth/verify-signup-otp';
             redirect = `/dashboard/${role}`;
         } else if (location.pathname === "/login-otp") {
-            url = 'http://localhost:8080/login/verify';
+            url = 'http://localhost:8080/auth/verify-login-otp';
             redirect = `/dashboard/${role}`;
         } else if (location.pathname === "/forgot-pass-otp") {
             url = 'http://localhost:8080/verify-forgot-pass-otp';
@@ -90,6 +90,8 @@ export default function Otp() {
         try {
             const res = await axios.post(url, {
                 otp: code,
+            }, {
+                withCredentials: true,
             });
             if (!res.data.success) {
                 setMessage("Invalid Otp");
@@ -108,9 +110,21 @@ export default function Otp() {
     const handleResendOtp = async (e) => {
         e.preventDefault();
         if (issecondDisable) return;
+        let url = '';
+        if (location.pathname === "/signup-otp") {
+            url = 'http://localhost:8080/auth/resend-signup-otp';
+        } else if (location.pathname === "/login-otp" || location.pathname === "/forgot-pass-otp") {
+            url = 'http://localhost:8080/auth/resend-login-otp';
+        } else {
+            setMessage("Invalid Otp Page");
+            setSuccess(false);
+            return;
+        }
         try {
             startSecondCooldown();
-            const res = await axios.post("http://localhost:8080/otp/resend");
+            const res = await axios.post(url, {
+                withCredentials: true
+            });
             if (!res.data.success) {
                 setMessage(res.data.message);
                 setSuccess(false);

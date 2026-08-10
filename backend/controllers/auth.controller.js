@@ -7,13 +7,13 @@ import generateToken from "../utils/generateToken.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 import { setTokenCookie, setEmailCookie, clearEmailCookie, clearTokenCookie } from "../utils/cookies.js";
 import { OTP_EXPIRY, BCRYPT_PASSWORD_ROUNDS, BCRYPT_OTP_ROUNDS, REDIS_OTP_EXPIRY } from "../utils/constants.js";
-import { signUpSchema, verifySignupOtp, loginDriverSchema, loginOwnerSchema, loginOtpSchema } from "../Validations/auth.validation.js";
+import { signUpSchema, verifySignupOtpSchema, loginDriverSchema, loginOwnerSchema, loginOtpSchema } from "../Validations/auth.validation.js";
 
 
 export const signUp = async (req, res) => {
     const result = signUpSchema.safeParse(req.body);
     if (!result.success) {
-        return sendError(res, 400, result.error.errors[0].message);
+        return sendError(res, 400, "All fields are required");
     }
     const { fullName, company, phone, confirmPassword, email, password } = result.data
 
@@ -36,18 +36,21 @@ export const signUp = async (req, res) => {
         otpExpiry: Date.now() + OTP_EXPIRY,
     });
     await redisClient.expire(`signup:${email}`, REDIS_OTP_EXPIRY);
+    console.log(email);
     setEmailCookie(res, email);
+    console.log(res.getHeaders());
     return sendSuccess(res, 200, "User will Registerd after otp confirmation");
 };
 
 export const verifySignupOtp = async (req, res) => {
-    const result = verifySignupOtp.safeParse(req.body);
+    console.log(req.body);
+    const result = verifySignupOtpSchema.safeParse(req.body);
     if (!result.success) {
-        return sendError(res, 400, result.error.errors[0].message);
+        return sendError(res, 400, "All fileds required");
     }
     const { otp } = result.data;
     const email = req.cookies.email;
-
+    console.log("Cookies:", req.cookies);
     if (!email) {
         return sendError(res, 400, "All fildes are required");
     };
@@ -69,7 +72,6 @@ export const verifySignupOtp = async (req, res) => {
         company: userData.company,
 
         password: userData.password,
-        userName: userData.userName,
         otp: userData.otp,
         otpExpiry: userData.otpExpiry,
         role: "Owner",
@@ -158,7 +160,7 @@ export const verifyLoginOtp = async (req, res) => {
         return sendError(res, 404, "Invalid Request");
     }
     const Otp = existingUser.otp;
-    const verifird = await bcrypt.compare(otp, Otp);
+    const verifird = bcrypt.compare(otp, Otp);
     if (!verifird) {
         return sendError(res, 400, "Otp is incorrect");
     }
@@ -166,4 +168,44 @@ export const verifyLoginOtp = async (req, res) => {
     setTokenCookie(res, token);
     clearEmailCookie(res);
     return sendSuccess(res, 200, "Otp verified successfully");
+};
+
+export const resendOtpforSignup = async (req, res) => {
+    const email = req.cookies.email;
+    if (!email) {
+        return sendError(req, 400, "Cookie expires, Please Login Again");
+    }
+    const userData = await redisClient.hgetall(`signup:${email}`);
+    if (!userData.email) {
+        return sendError(req, 404, "data not found");
+    };
+    const otp = generateOtp();
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    await sendOtp(otp, userData.email);
+    await redisClient.hset(`signup:${email}`, {
+        otp: hashedOtp,
+        otpExpiry: Date.now() + OTP_EXPIRY,
+    });
+    await redisClient.expire(`signup:${email}`, REDIS_OTP_EXPIRY);
+    return sendSuccess(res, 200, "Otp Resend Successfully");
+
+};
+
+export const resendOtpforLogin = async (req, res) => {
+    const email = req.cookies.email;
+    if (!email) {
+        return sendError(res, 400, "Cookie expires, Please Login Again");
+    };
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+        return sendError(res, 404, "User dose not exist");
+    };
+    const otp = generateOtp();
+    await sendOtp(otp, email);
+    const hashedOtp = await bcrypt.hash(otp, BCRYPT_OTP_ROUNDS);
+    await User.updateOne({
+        otp: hashedOtp,
+        otpExpiry: Date.now() + OTP_EXPIRY,
+    });
+    return sendSuccess(res, 200, "Otp Resend Successfully");
 };

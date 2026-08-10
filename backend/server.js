@@ -4,15 +4,20 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
 import forgotPassRoutes from "./routes/forgotPassRoutes.js";
+import { connectDB } from "./utils/connectMongo.js";
 const app = express();
 dotenv.config();
 const port = process.env.PORT;
+(
+    async () => await connectDB()
+)();
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
     origin: (origin, callback) => callback(null, true),
     credentials: true,
-}))
+}));
+
 
 app.get("/", (req, res) => {
     res.send("App is live");

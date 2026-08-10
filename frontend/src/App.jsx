@@ -22,8 +22,8 @@ function App() {
           <Route path='/login-otp' element={<Otp />} />
           <Route path='/forgot-pass-otp' element={<Otp />} />
           <Route path='/ask-role' element={<AskRole />} />
-          <Route path='/forgot-password' element={<ForgotPassEmail />} />
-          <Route path='/reset-password' element={<UpdatePass />} />
+          <Route path='/auth/forgot-password' element={<ForgotPassEmail />} />
+          <Route path='/auth/reset-password' element={<UpdatePass />} />
         </Routes>
       </BrowserRouter>
 

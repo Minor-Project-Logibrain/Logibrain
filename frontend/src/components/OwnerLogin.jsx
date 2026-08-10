@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faArrowLeft, faL } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import "./OwnerLogin.css";
 import Logo from "../assets/logo.png";
@@ -16,7 +16,7 @@ export default function OwnerLogin() {
     const [rememberMe, setRememberMe] = useState(false);
     const [message, setMessage] = useState('');
     const [success, setSuccess] = useState(false);
-
+    const navigate = useNavigate();
     const togglePassword = () => {
         setShowpass(!showpass);
     }
@@ -25,9 +25,11 @@ export default function OwnerLogin() {
         if (isDisable) return;
         startCooldown();
         try {
-            const res = await axios.post('http://localhost:8080/owner/login', {
+            const res = await axios.post('http://localhost:8080/auth/login/owner', {
                 email,
                 password,
+            }, {
+                withCredentials: true
             });
             if (!res.data.success) {
                 setMessage(res.data.message);

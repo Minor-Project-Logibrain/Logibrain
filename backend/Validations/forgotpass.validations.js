@@ -8,6 +8,6 @@ export const forgotPassOtpSchema = z.object({
 })
 export const resetPassSchema = z.object({
     password: z.string().length(8, "Password should be 8 characters"),
-    newPassword: z.string.length(8, "Password should be 8 characters"),
+    newPassword: z.string().length(8, "Password should be 8 characters"),
 });
 

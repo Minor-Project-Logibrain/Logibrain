@@ -1,8 +1,7 @@
-import { verify } from "jsonwebtoken";
 import { email, z } from "zod";
 
 export const signUpSchema = z.object({
-    fulName: z.string().min(3, "Full Name must be at least 3 characters"),
+    fullName: z.string().min(3, "Full Name must be at least 3 characters"),
     company: z.string().min(6, "Company Name is Required"),
     phone: z.string().regex(/^[6-9][0-9]{9}$/, "Invalid Phone Number"),
     email: z.string().email("Email is Invalid"),
@@ -15,7 +14,7 @@ export const signUpSchema = z.object({
     path: ["confirmPassword"],
 });
 
-export const verifySignupOtp = z.object({
+export const verifySignupOtpSchema = z.object({
     otp: z.string().length(6, "Otp must be 6 digits").regex(/^\d{6}$/, "Invalid Otp"),
 
 });
