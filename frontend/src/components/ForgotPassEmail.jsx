@@ -20,7 +20,7 @@ export default function ForgotPassEmail() {
 
         startCooldown();
         try {
-            const res = await axios.post("http://localhost:8080/forgot/passhome-page", {
+            const res = await axios.post("http://localhost:8080/forgotPass/forgot/passhome-page", {
                 email,
             }, {
                 withCredentials: true
@@ -41,13 +41,21 @@ export default function ForgotPassEmail() {
             }, 2000);
 
         } catch (err) {
-            setMessage(err.response?.data?.message || err.message || "Something went wrong!");
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
         }
     };
+
     return (
         <div className="forgot-pass-wrapper">
-            <Message message={message} success={success} />
+            <Message message={message} success={success} clearMessage={() => setMessage('')} />
 
             {/* Back to Login Link */}
             <div className="forgot-pass-header-nav">

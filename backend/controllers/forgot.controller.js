@@ -36,21 +36,21 @@ export const forgotpassEmail = async (req, res) => {
 export const forgotOtp = async (req, res) => {
     const result = forgotPassOtpSchema.safeParse(req.body);
     if (!result.success) {
-        return sendError(req, 400, result.error.issues[0]?.message || "Invalid data");
+        return sendError(res, 400, result.error.issues[0]?.message || "Invalid data");
     };
     const { otp } = result.data;
     const email = req.cookies.email;
     if (!email || !otp) {
-        return sendError(req, 401, "All Fields are Required");
+        return sendError(res, 401, "All Fields are Required");
     };
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-        return sendError(req, 501, "Invalid Request");
+        return sendError(res, 501, "Invalid Request");
     }
     const Otp = existingUser.otp;
     const verifird = await bcrypt.compare(otp, Otp);
     if (!verifird) {
-        return sendError(req, 400, "Otp incorrect");
+        return sendError(res, 400, "Otp incorrect");
     }
     return sendSuccess(res, 200, "Otp verified successfully");
 };
@@ -58,19 +58,19 @@ export const forgotOtp = async (req, res) => {
 export const resetPass = async (req, res) => {
     const result = resetPassSchema.safeParse(req.body);
     if (!result.success) {
-        return sendError(req, 400, result.error.issues[0]?.message || "Invalid data");
+        return sendError(res, 400, "Invalid data");
     };
     const { password, newPassword } = result.data;
     const email = req.cookies.email;
     if (!email) {
-        return sendError(req, 403, "Access Denied ,Cookie Time Out");
+        return sendError(res, 403, "Access Denied ,Cookie Time Out");
     }
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-        return sendError(req, 501, "Invalid Request");
+        return sendError(res, 501, "Invalid Request");
     }
     if (password !== newPassword) {
-        return sendError(req, 501, "Password is incorrect");
+        return sendError(res, 501, "Password is incorrect");
     }
     const hashedPass = await bcrypt.hash(password, 10);
     await User.updateOne({ email }, {

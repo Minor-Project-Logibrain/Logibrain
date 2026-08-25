@@ -22,35 +22,54 @@ export default function OwnerLogin() {
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (isDisable) return;
+
         startCooldown();
+
         try {
-            const res = await axios.post('http://localhost:8080/auth/login/owner', {
-                email,
-                password,
-            }, {
-                withCredentials: true
-            });
+            const res = await axios.post(
+                "http://localhost:8080/auth/login/owner",
+                {
+                    email,
+                    password,
+                },
+                {
+                    withCredentials: true,
+                }
+            );
+
+            // Backend responded with success: false
             if (!res.data.success) {
                 setMessage(res.data.message);
                 setSuccess(false);
                 return;
             }
-            setMessage("Login successfully" || res.data.message);
+
+            // Login successful
+            setMessage(res.data.message || "Login successful");
             setSuccess(true);
+
             localStorage.setItem("role", "owner");
+
             navigate("/owner/dashboard");
 
-
         } catch (err) {
-            setMessage(err.message || "Something went wrong!");
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
         }
-    }
+    };
 
     return (
         <div className="login-wrapper">
-            <Message message={message} success={success} />
+            <Message message={message} success={success} clearMessage={() => setMessage('')} />
 
             {/* Back to Home Link */}
             <div className="login-header-nav">
@@ -89,7 +108,7 @@ export default function OwnerLogin() {
                         <div className="form-group">
                             <div className="label-row">
                                 <label htmlFor="password">Password</label>
-                                <Link to="/forgot-password" className="forgot-password">
+                                <Link to="/auth/forgot-password" className="forgot-password">
                                     Forgot Password?
                                 </Link>
                             </div>

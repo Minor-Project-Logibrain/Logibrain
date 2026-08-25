@@ -58,7 +58,14 @@ function Signup() {
                 }, 1000);
             }
         } catch (err) {
-            setMessage("Something went wrong");
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
             return;
         }
@@ -76,7 +83,7 @@ function Signup() {
 
             {/* Centered Signup Card */}
             <div className="login-box-container">
-                <Message message={message} success={success} />
+                <Message message={message} success={success} clearMessage={() => setMessage('')} />
                 <div className="login-card">
                     <div className="card-brand">
                         <img src={Logo} alt="LogiBrain Logo" className="card-logo" />

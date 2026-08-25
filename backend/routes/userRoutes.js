@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import errorHandler from "../utils/ExpressError.js";
-import { loginDriver, loginOwner, verifyLoginOtp, signUp, verifySignupOtp, resendOtpforSignup, resendOtpforLogin } from "../controllers/auth.controller.js"
+import { loginDriver, loginOwner, verifyLoginOtp, signUp, verifySignupOtp, resendOtpforSignup, resendOtpforLogin, check } from "../controllers/auth.controller.js"
+import { hasToken } from "../middleware/hastoken.js";
 const router = Router();
 
 
@@ -13,7 +14,7 @@ router.post("/login/owner", errorHandler(loginOwner));
 router.post("/verify-login-otp", errorHandler(verifyLoginOtp));
 router.post("/resend-signup-otp", errorHandler(resendOtpforSignup));
 router.post("/resend-login-otp", errorHandler(resendOtpforLogin));
-
+router.get("/check", hasToken, errorHandler(check));
 
 
 export default router;

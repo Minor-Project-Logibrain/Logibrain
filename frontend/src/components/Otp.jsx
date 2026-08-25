@@ -74,12 +74,12 @@ export default function Otp() {
         let redirect = '/dashboard';
         if (location.pathname === "/signup-otp") {
             url = 'http://localhost:8080/auth/verify-signup-otp';
-            redirect = `/dashboard/${role}`;
+            redirect = `/${role}/dashboard`;
         } else if (location.pathname === "/login-otp") {
             url = 'http://localhost:8080/auth/verify-login-otp';
             redirect = `/dashboard/${role}`;
         } else if (location.pathname === "/forgot-pass-otp") {
-            url = 'http://localhost:8080/verify-forgot-pass-otp';
+            url = 'http://localhost:8080/forgotPass/verify-forgot-pass-otp';
             redirect = '/reset-password';
         }
         else {
@@ -102,7 +102,14 @@ export default function Otp() {
             setSuccess(true);
             navigate(redirect);
         } catch (err) {
-            setMessage(err.message || err.response?.data?.message || "Something went wrong!");
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
             return;
         }
@@ -132,8 +139,15 @@ export default function Otp() {
             }
             setMessage("OTP resend successfully" || res.data.message);
             setSuccess(true);
-        } catch (error) {
-            setMessage(error.message || error.response?.data?.message || "Something went wrong!");
+        } catch (err) {
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
             return;
         }
@@ -145,7 +159,7 @@ export default function Otp() {
             <div className="otp-card">
                 <h1 className="otp-heading">OTP Verification</h1>
                 <p className="otp-instruction">Please enter the 6-digit verification code sent to your device.</p>
-                {message && <Message message={message} success={success} />}
+                {message && <Message message={message} success={success} clearMessage={() => setMessage('')} />}
                 <div className="otp-wrapper">
                     {otp.map((digit, index) => (
                         <input

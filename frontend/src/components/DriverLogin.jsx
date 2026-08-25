@@ -34,6 +34,7 @@ export default function DriverLogin() {
             });
             if (!res.data.success) {
                 setMessage(res.data.message);
+
                 setSuccess(false);
                 return;
             }
@@ -43,14 +44,21 @@ export default function DriverLogin() {
             navigate("/driver/dashboard");
 
         } catch (err) {
-            setMessage(err.message || "Something went wrong!");
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
         }
     }
 
     return (
         <div className="driver-login-wrapper">
-            <Message message={message} success={success} />
+            <Message message={message} success={success} clearMessage={() => setMessage('')} />
             {/* Back to Home Link */}
             <div className="login-header-nav">
                 <Link to="/" className="back-link">
@@ -109,7 +117,7 @@ export default function DriverLogin() {
                         <div className="form-group">
                             <div className="label-row">
                                 <label htmlFor="password">Password</label>
-                                <Link to="/forgot-password" className="forgot-password">
+                                <Link to="/auth/forgot-password" className="forgot-password">
                                     Forgot Password?
                                 </Link>
                             </div>

@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
 import forgotPassRoutes from "./routes/forgotPassRoutes.js";
 import { connectDB } from "./utils/connectMongo.js";
+import ownerRoutes from "./routes/ownerRoutes.js";
 const app = express();
 dotenv.config();
 const port = process.env.PORT;
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 
 app.use("/auth", userRoutes);
 app.use("/forgotPass", forgotPassRoutes);
+app.use("/owners", ownerRoutes);
 
 app.use((err, req, res, next) => {
     console.log(err);

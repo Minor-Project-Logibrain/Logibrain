@@ -1,0 +1,162 @@
+.db-navbar {
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 100;
+}
+
+
+/* Left Side */
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.db-navbar-brand {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.db-navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.db-navbar-link {
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #64748b;
+
+    transition: color 0.2s ease;
+}
+
+.db-navbar-link:hover {
+    color: #2563eb;
+}
+
+.db-navbar-link.active {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+
+/* Right Side */
+
+.db-navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+/* Quick Create */
+
+.db-btn-primary {
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 12px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #2563eb;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.db-btn-primary .material-symbols-outlined {
+    font-size: 16px;
+    margin-right: 4px;
+}
+
+
+/* Icon Buttons */
+
+.db-icon-btn {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #64748b;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.db-icon-btn:hover {
+    background: #f1f5f9;
+}
+
+.db-icon-btn .material-symbols-outlined {
+    font-size: 20px;
+}
+
+
+/* Avatar */
+
+.db-avatar {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    overflow: hidden;
+}
+
+.db-avatar img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+/* Responsive */
+
+@media (max-width: 700px) {
+
+    .db-navbar-links {
+        display: none;
+    }
+
+    .db-btn-primary {
+        display: none;
+    }
+
+    .db-navbar {
+        padding: 0 15px;
+    }
+}

@@ -8,12 +8,20 @@ import { sendError, sendSuccess } from "../utils/response.js";
 import { setTokenCookie, setEmailCookie, clearEmailCookie, clearTokenCookie } from "../utils/cookies.js";
 import { OTP_EXPIRY, BCRYPT_PASSWORD_ROUNDS, BCRYPT_OTP_ROUNDS, REDIS_OTP_EXPIRY } from "../utils/constants.js";
 import { signUpSchema, verifySignupOtpSchema, loginDriverSchema, loginOwnerSchema, loginOtpSchema } from "../Validations/auth.validation.js";
+import cookieParser from "cookie-parser";
 
 
 export const signUp = async (req, res) => {
     const result = signUpSchema.safeParse(req.body);
+
     if (!result.success) {
-        return sendError(res, 400, "All fields are required");
+        console.log(result.error.issues);
+
+        return sendError(
+            res,
+            400,
+            result.error.issues[0].message
+        );
     }
     const { fullName, company, phone, confirmPassword, email, password } = result.data
 
@@ -122,7 +130,7 @@ export const loginDriver = async (req, res) => {
 export const loginOwner = async (req, res) => {
     const result = loginOwnerSchema.safeParse(req.body);
     if (!result.success) {
-        return sendError(res, 400, result.error.error[0].message || "All the fields are Required");
+        return sendError(res, 400, "All the fields are Required");
     }
     const { email, password } = result.data;
     const existingUser = await User.findOne({ email });
@@ -133,22 +141,20 @@ export const loginOwner = async (req, res) => {
     if (!compair) {
         return sendError(res, 400, "Password is incorrect");
     };
-    const otp = generateOtp();
-    await sendOtp(otp, email);
-    const hashedOtp = await bcrypt.hash(otp, BCRYPT_OTP_ROUNDS);
+    const token = generateToken(existingUser._id);
     await User.updateOne({ email }, {
-        otp: hashedOtp,
-        otpExpiry: Date.now() + OTP_EXPIRY,
         role: "Owner",
     });
     setEmailCookie(res, email);
+    setTokenCookie(res, token);
+
     return sendSuccess(res, 200, "Email is verified");
 }
 
 export const verifyLoginOtp = async (req, res) => {
     const result = loginOtpSchema.safeParse(req.body);
     if (!result.success) {
-        return sendError(res, 400, result.error.errors[0].message || "All filed are Required");
+        return sendError(res, 400, "All filed are Required");
     }
     const { otp } = result.data;
     const email = req.cookies.email;
@@ -209,3 +215,7 @@ export const resendOtpforLogin = async (req, res) => {
     });
     return sendSuccess(res, 200, "Otp Resend Successfully");
 };
+
+export const check = async (req, res) => {
+    return sendSuccess(res, 200, "User is Verified");
+}

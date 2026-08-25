@@ -32,7 +32,7 @@ export default function UpdatePass() {
         setIsLoading(true);
         setMessage("");
         try {
-            const res = await axios.post("http://localhost:8080/forgot-pass-set-new-pass", {
+            const res = await axios.post("http://localhost:8080/forgotPass/forgot-pass-set-new-pass", {
                 password: password,
                 newPassword: confirmPassword,
             }, {
@@ -50,19 +50,27 @@ export default function UpdatePass() {
             setSuccess(true);
 
             setTimeout(() => {
-                navigate("/login");
+                navigate("/ask-role");
             }, 2000);
 
         } catch (err) {
-            setMessage(err.response?.data?.message || err.response?.data?.json || err.message || "Something went wrong!");
+            console.log("Login error:", err);
+
+            // Get message sent by backend
+            const errorMessage =
+                err.response?.data?.message ||
+                "Something went wrong!";
+
+            setMessage(errorMessage);
             setSuccess(false);
             setIsLoading(false);
+            return;
         }
     };
 
     return (
         <div className="update-pass-wrapper">
-            <Message message={message} success={success} />
+            <Message message={message} success={success} clearMessage={() => setMessage('')} />
 
             {/* Back to Login Link */}
             <div className="update-pass-header-nav">
@@ -86,7 +94,7 @@ export default function UpdatePass() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="update-pass-form">
-                        
+
                         {/* New Password Field */}
                         <div className="update-pass-form-group">
                             <label htmlFor="password">New Password</label>

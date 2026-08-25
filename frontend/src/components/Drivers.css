@@ -1,0 +1,270 @@
+/* Main driver section */
+.driverContainer {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+/* Individual driver card */
+.driverContainer>div {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.driverContainer>div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+/* Driver name */
+.driverContainer h3 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Driver information */
+.driverContainer p {
+    margin: 8px 0;
+    font-size: 15px;
+    color: #475569;
+}
+
+/* Add a small label-like appearance */
+.driverContainer p:nth-child(2)::before {
+    content: "📞 ";
+}
+
+.driverContainer p:nth-child(3)::before {
+    content: "✉️ ";
+}
+
+/* Header */
+.drivers-header {
+    width: 100%;
+}
+
+/* Card Actions */
+.driver-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 14px;
+}
+
+.btn-edit,
+.btn-delete {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-edit {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+}
+
+.btn-edit:hover {
+    background: #f8fafc;
+    color: #2563eb;
+    border-color: #cbd5e1;
+}
+
+.btn-delete {
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+}
+
+.btn-delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+.btn-edit .material-symbols-outlined,
+.btn-delete .material-symbols-outlined {
+    font-size: 16px;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+/* Modal Box */
+.modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 440px;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.modal-close-btn:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Form Styles inside Modal */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modal-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-form label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.modal-form input {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    color: #0f172a;
+}
+
+.modal-form input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Modal Actions Footer */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-cancel,
+.btn-save,
+.btn-confirm-delete {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-cancel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+}
+
+.btn-cancel:hover {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.btn-save {
+    background: #2563eb;
+    border: none;
+    color: #ffffff;
+}
+
+.btn-save:hover {
+    background: #1d4ed8;
+}
+
+.btn-confirm-delete {
+    background: #dc2626;
+    border: none;
+    color: #ffffff;
+}
+
+.btn-confirm-delete:hover {
+    background: #b91c1c;
+}
+
+.warning-text {
+    color: #ea580c;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin: 4px 0 0 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .driverContainer {
+        grid-template-columns: 1fr;
+    }
+
+    .drivers-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+}
