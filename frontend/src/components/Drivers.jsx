@@ -138,6 +138,7 @@ export default function Drivers() {
                                 <h3>{driver.fullName}</h3>
                                 <p><span>Phone: </span>{driver.phone}</p>
                                 <p><span>Email: </span>{driver.email}</p>
+                                <p><span>Status: </span>{driver.status}</p>
                                 <div className="driver-card-actions">
                                     <button
                                         type="button"

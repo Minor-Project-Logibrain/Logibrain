@@ -5,6 +5,8 @@ import "./OwnerDashBoard.css";
 import { useEffect, useState } from "react";
 import Drivers from "./Drivers";
 import Dashboard from "./DashBoard";
+import Trucks from "./Trucks";
+import Trips from "./Trips";
 
 export default function OwnerDashboard() {
     const [activeNav, setActiveNav] = useState("dashboard");
@@ -23,6 +25,8 @@ export default function OwnerDashboard() {
             <main className="dashboard-content">
                 {activeNav === "dashboard" && <Dashboard />}
                 {activeNav === "drivers" && <Drivers />}
+                {activeNav === "trucks" && <Trucks />}
+                {activeNav === "trips" && <Trips />}
 
 
             </main>

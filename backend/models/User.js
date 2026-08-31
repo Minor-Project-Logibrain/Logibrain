@@ -37,6 +37,11 @@ const userSchema = new mongoose.Schema({
     otpExpiry: {
         type: Date,
     },
+    status: {
+        type: String,
+        enum: ["available", "inactive", "on-trip", "off-duty", "assigned"],
+        default: "available"
+    }
 }, {
     timestamps: true,
 });

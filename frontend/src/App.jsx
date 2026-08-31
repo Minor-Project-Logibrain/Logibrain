@@ -10,6 +10,8 @@ import ForgotPassEmail from './components/ForgotPassEmail'
 import UpdatePass from './components/updatePass'
 import OwnerDashBoard from './components/OwnerDashBoard'
 import AddDriverForm from './components/addDriverForm'
+import AddTruckForm from './components/AddTruckForm'
+import AddTripForm from './components/AddTripForm'
 import ProtectedOwnerRoutes from './utils/ProtectedOwnerRoutes'
 import DriverDashBoard from './components/DriverDashBoard'
 import ProtectedDriverRoutes from './utils/ProtectedDriverRoutes'
@@ -32,6 +34,8 @@ function App() {
           <Route element={<ProtectedOwnerRoutes />}>
             <Route path='/owner/dashboard' element={<OwnerDashBoard />} />
             <Route path='/owner/add-driver' element={<AddDriverForm />} />
+            <Route path='/owner/add-truck' element={<AddTruckForm />} />
+            <Route path='/owner/add-trip' element={<AddTripForm />} />
           </Route>
           <Route element={<ProtectedDriverRoutes />}>
             <Route path='/driver/dashboard' element={<DriverDashBoard />} />

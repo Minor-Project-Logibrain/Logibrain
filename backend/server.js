@@ -18,7 +18,7 @@ app.use(cors({
     origin: (origin, callback) => callback(null, true),
     credentials: true,
 }));
-
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
     res.send("App is live");

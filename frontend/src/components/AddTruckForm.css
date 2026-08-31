@@ -1,0 +1,221 @@
+.add-truck-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    color: #0f172a;
+    position: relative;
+}
+
+.add-truck-header-nav {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: 10;
+}
+
+.back-link-truck {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.back-link-truck:hover {
+    color: #2563eb;
+    border-color: #93c5fd;
+    background-color: #f8fafc;
+}
+
+.add-truck-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px 40px;
+}
+
+.add-truck-card {
+    width: 100%;
+    max-width: 840px;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.truck-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.truck-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.truck-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.truck-header-text {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.truck-header-text h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.truck-header-text p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.add-truck-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.form-section {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 24px;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+    padding-left: 8px;
+    border-left: 3px solid #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 24px;
+}
+
+.form-group-truck {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-truck label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.form-group-truck input[type="text"],
+.form-group-truck input[type="number"],
+.form-group-truck input[type="date"],
+.form-group-truck select {
+    width: 100%;
+    padding: 11px 14px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    outline: none;
+    font-size: 14px;
+    color: #0f172a;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.form-group-truck input:focus,
+.form-group-truck select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.submit-row {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submit-truck-btn {
+    min-width: 180px;
+    padding: 13px 28px;
+    border: none;
+    border-radius: 12px;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.submit-truck-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.submit-truck-btn:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+    .add-truck-card {
+        padding: 24px 16px;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .submit-row {
+        justify-content: center;
+    }
+
+    .submit-truck-btn {
+        width: 100%;
+    }
+
+    .add-truck-header-nav {
+        position: relative;
+        top: 0;
+        left: 0;
+        margin-bottom: 20px;
+        padding: 16px 20px 0;
+    }
+
+    .add-truck-container {
+        padding-top: 20px;
+    }
+}

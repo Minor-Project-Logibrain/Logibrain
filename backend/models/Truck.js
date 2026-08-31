@@ -43,6 +43,10 @@ const TruckSchema = new mongoose.Schema({
         ref: "User",
         default: null,
     },
+    img: {
+        type: String,
+        default: "",
+    },
     rcNumber: String,
     insurenceNumber: String,
     insurenceExpiry: Date,
