@@ -1,264 +1,527 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Message from "./Message";
-import "./OwnerLogin.css";
+import axios from "axios";
 import "./OwnerDashBoard.css";
+import "./DriverAddBill.css";
 
-export default function DriverAddBill() {
-    const [trip, setTrip] = useState("TRIP-8042");
-    const [billType, setBillType] = useState("Fuel");
-    const [amount, setAmount] = useState("");
-    const [billDate, setBillDate] = useState("");
-    const [description, setDescription] = useState("");
-    const [receipt, setReceipt] = useState(null);
+export default function DriverAddBill({ selectedTrip, onBack }) {
+    // =========================================================================
+    // 1. STATE MANAGEMENT
+    // =========================================================================
+    // All driver trips for fallback dropdown selection if no trip was pre-selected
+    const [tripsList, setTripsList] = useState([]);
+    const [currentTripId, setCurrentTripId] = useState(
+        selectedTrip?._id || selectedTrip?.tripNo || ""
+    );
+
+    // Multi-bill dynamic state array
+    const [bills, setBills] = useState([
+        {
+            id: 1,
+            billType: "Fuel",
+            amount: "",
+            billDate: new Date().toISOString().split("T")[0],
+            description: "",
+            receipt: null,
+            receiptName: "",
+        },
+    ]);
+
+    // Alert & submission state
     const [message, setMessage] = useState("");
     const [success, setSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
-    const handleFileChange = (e) => {
+    // Fetch assigned trips if needed
+    useEffect(() => {
+        if (!selectedTrip) {
+            const fetchTrips = async () => {
+                try {
+                    const res = await axios.get(
+                        "http://localhost:8080/driver/trips/get-trips",
+                        { withCredentials: true }
+                    );
+                    if (res.data.success && res.data.result?.length > 0) {
+                        setTripsList(res.data.result);
+                        setCurrentTripId(
+                            res.data.result[0]._id || res.data.result[0].tripNo
+                        );
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch assigned trips:", err);
+                }
+            };
+            fetchTrips();
+        } else {
+            setCurrentTripId(selectedTrip._id || selectedTrip.tripNo);
+        }
+    }, [selectedTrip]);
+
+    // Active trip context data
+    const activeTrip =
+        selectedTrip ||
+        tripsList.find(
+            (t) => t._id === currentTripId || t.tripNo === currentTripId
+        );
+
+    // =========================================================================
+    // 2. DYNAMIC BILL ITEM HANDLERS (Add More Bills, Remove, Edit)
+    // =========================================================================
+    // Add a new blank bill card to the list
+    const handleAddMoreBill = () => {
+        setBills((prev) => [
+            ...prev,
+            {
+                id: Date.now() + Math.random(),
+                billType: "Fuel",
+                amount: "",
+                billDate: new Date().toISOString().split("T")[0],
+                description: "",
+                receipt: null,
+                receiptName: "",
+            },
+        ]);
+    };
+
+    // Remove a specific bill card by ID (and vice versa)
+    const handleRemoveBill = (idToRemove) => {
+        if (bills.length === 1) return;
+        setBills((prev) => prev.filter((b) => b.id !== idToRemove));
+    };
+
+    // Update field value of a specific bill
+    const handleBillFieldChange = (id, field, value) => {
+        setBills((prev) =>
+            prev.map((b) => (b.id === id ? { ...b, [field]: value } : b))
+        );
+    };
+
+    // Handle receipt file upload for a specific bill
+    const handleReceiptFileChange = (id, e) => {
         if (e.target.files && e.target.files[0]) {
-            setReceipt(e.target.files[0]);
+            const file = e.target.files[0];
+            setBills((prev) =>
+                prev.map((b) =>
+                    b.id === id
+                        ? { ...b, receipt: file, receiptName: file.name }
+                        : b
+                )
+            );
         }
     };
 
+    // Calculate live total across all bills
+    const totalExpenseAmount = bills.reduce(
+        (sum, b) => sum + (parseFloat(b.amount) || 0),
+        0
+    );
+
+    // =========================================================================
+    // 3. SUBMIT BILLS HANDLER
+    // =========================================================================
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!amount || !billDate || !description) {
-            setMessage("Please fill in all required fields.");
-            setSuccess(false);
-            return;
-        }
-
-        if (parseFloat(amount) <= 0) {
-            setMessage("Expense amount must be greater than zero.");
-            setSuccess(false);
-            return;
+        // Validate each bill item
+        for (let i = 0; i < bills.length; i++) {
+            const b = bills[i];
+            if (!b.amount || parseFloat(b.amount) <= 0) {
+                setMessage(
+                    `Please enter a valid expense amount for Bill #${i + 1}.`
+                );
+                setSuccess(false);
+                return;
+            }
+            if (!b.billDate) {
+                setMessage(`Please select a date for Bill #${i + 1}.`);
+                setSuccess(false);
+                return;
+            }
+            if (!b.description.trim()) {
+                setMessage(
+                    `Please enter a description/remarks for Bill #${i + 1}.`
+                );
+                setSuccess(false);
+                return;
+            }
         }
 
         setSubmitting(true);
         setMessage("");
 
-        // Mock API submission on frontend
+        // Mock API Submission / Trigger
         setTimeout(() => {
             setSuccess(true);
-            setMessage("Bill submitted successfully! Pending approval from Owner.");
-            setAmount("");
-            setBillDate("");
-            setDescription("");
-            setReceipt(null);
+            setMessage(
+                `Successfully submitted ${bills.length} bill${bills.length > 1 ? "s" : ""
+                } (Total: ₹${totalExpenseAmount.toLocaleString()}) for approval!`
+            );
+            // Reset to 1 fresh bill card
+            setBills([
+                {
+                    id: Date.now(),
+                    billType: "Fuel",
+                    amount: "",
+                    billDate: new Date().toISOString().split("T")[0],
+                    description: "",
+                    receipt: null,
+                    receiptName: "",
+                },
+            ]);
             setSubmitting(false);
-        }, 1200);
+        }, 1000);
     };
 
     return (
-        <div className="dashboard-page animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-            <Message message={message} success={success} clearMessage={() => setMessage("")} />
-
-            {/* Page Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "12px" }}>
-                <div>
-                    <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#0f172a", margin: 0 }}>Add Bill / Claim Expense</h2>
-                    <p style={{ fontSize: "13px", color: "#64748b", margin: "4px 0 0" }}>File fuel, toll, or food expenses for reimbursement.</p>
+        <div className="dashboard-page animate-fade-in driver-add-bill-page">
+            {/* =====================================================================
+                HEADER & NAVIGATION BAR (With Back to Trips Button)
+               ===================================================================== */}
+            <div className="driver-bill-header">
+                <div className="driver-bill-header-left">
+                    {onBack && (
+                        <button
+                            type="button"
+                            className="driver-back-btn"
+                            onClick={onBack}
+                            title="Go back to assigned trips list"
+                        >
+                            <span className="material-symbols-outlined">
+                                arrow_back
+                            </span>
+                            Back to Trips
+                        </button>
+                    )}
+                    <div>
+                        <h2>Claim Trip Expenses & Bills</h2>
+                        <p>File fuel, toll, maintenance, or food bills for reimbursement.</p>
+                    </div>
                 </div>
-                <div className="db-date-badge" style={{ backgroundColor: "#2563eb", color: "#ffffff", border: "none" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>payments</span>
-                    Reimbursements
+
+                <div className="driver-reimburse-badge">
+                    <span className="material-symbols-outlined">payments</span>
+                    Expense Claims
                 </div>
             </div>
 
-            {/* Form Section */}
-            <div className="db-card" style={{ padding: "32px", maxWidth: "800px", margin: "0 auto", width: "100%" }}>
-                <form onSubmit={handleSubmit} className="login-form" style={{ gap: "24px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                        {/* Select Trip */}
-                        <div className="form-group">
-                            <label htmlFor="trip">Select Assigned Trip *</label>
-                            <select
-                                id="trip"
-                                value={trip}
-                                onChange={(e) => setTrip(e.target.value)}
-                                required
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    border: "1px solid #cbd5e1",
-                                    borderRadius: "12px",
-                                    outline: "none",
-                                    fontSize: "14px",
-                                    backgroundColor: "#ffffff",
-                                    color: "#0f172a",
-                                    boxSizing: "border-box"
-                                }}
-                            >
-                                <option value="TRIP-8042">TRIP-8042 (Delhi to Mumbai - Active)</option>
-                                <option value="TRIP-7981">TRIP-7981 (Pune to Bangalore - Delivered)</option>
-                                <option value="TRIP-7854">TRIP-7854 (Chennai to Hyderabad - Delivered)</option>
-                            </select>
-                        </div>
+            {/* =====================================================================
+                ALERT / FEEDBACK MESSAGE
+               ===================================================================== */}
+            <Message
+                message={message}
+                success={success}
+                clearMessage={() => setMessage("")}
+            />
 
-                        {/* Bill Type */}
-                        <div className="form-group">
-                            <label htmlFor="billType">Bill Type / Category *</label>
-                            <select
-                                id="billType"
-                                value={billType}
-                                onChange={(e) => setBillType(e.target.value)}
-                                required
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    border: "1px solid #cbd5e1",
-                                    borderRadius: "12px",
-                                    outline: "none",
-                                    fontSize: "14px",
-                                    backgroundColor: "#ffffff",
-                                    color: "#0f172a",
-                                    boxSizing: "border-box"
-                                }}
-                            >
-                                <option value="Fuel">Fuel (Diesel / CNG)</option>
-                                <option value="Toll">Toll Taxes / Fastag recharge</option>
-                                <option value="Food">Food / Meals Allowance</option>
-                                <option value="Maintenance">Emergency Vehicle Repair</option>
-                                <option value="Other">Other Expenses</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                        {/* Amount */}
-                        <div className="form-group">
-                            <label htmlFor="amount">Expense Amount (INR) *</label>
-                            <input
-                                id="amount"
-                                type="number"
-                                placeholder="Enter bill amount (e.g. 4500)"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                required
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    border: "1px solid #cbd5e1",
-                                    borderRadius: "12px",
-                                    outline: "none",
-                                    fontSize: "14px",
-                                    boxSizing: "border-box"
-                                }}
-                            />
-                        </div>
-
-                        {/* Date */}
-                        <div className="form-group">
-                            <label htmlFor="billDate">Date of Expense *</label>
-                            <input
-                                id="billDate"
-                                type="date"
-                                value={billDate}
-                                onChange={(e) => setBillDate(e.target.value)}
-                                required
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    border: "1px solid #cbd5e1",
-                                    borderRadius: "12px",
-                                    outline: "none",
-                                    fontSize: "14px",
-                                    boxSizing: "border-box"
-                                }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Receipt Upload */}
-                    <div className="form-group">
-                        <label>Upload Receipt/Bill (Optional)</label>
-                        <div style={{
-                            border: "2px dashed #cbd5e1",
-                            borderRadius: "14px",
-                            padding: "24px",
-                            textAlign: "center",
-                            backgroundColor: "#f8fafc",
-                            cursor: "pointer",
-                            position: "relative",
-                            transition: "border-color 0.2s"
-                        }}>
-                            <input
-                                type="file"
-                                accept="image/*,application/pdf"
-                                onChange={handleFileChange}
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100%",
-                                    height: "100%",
-                                    opacity: 0,
-                                    cursor: "pointer"
-                                }}
-                            />
-                            <span className="material-symbols-outlined" style={{ fontSize: "36px", color: "#64748b", marginBottom: "8px" }}>
-                                cloud_upload
+            {/* =====================================================================
+                ASSIGNED TRIP CONTEXT CARD
+               ===================================================================== */}
+            {activeTrip ? (
+                <div className="driver-trip-context-card">
+                    <div className="trip-context-info">
+                        <span className="trip-context-pill">Assigned Trip</span>
+                        <div className="trip-context-title">
+                            <span className="material-symbols-outlined">
+                                route
                             </span>
-                            <p style={{ fontSize: "14px", fontWeight: "600", color: "#475569", margin: "0 0 4px" }}>
-                                {receipt ? receipt.name : "Drag & Drop or Click to Upload Receipt"}
-                            </p>
-                            <p style={{ fontSize: "11px", color: "#94a3b8", margin: 0 }}>
-                                Supports JPEG, PNG, or PDF up to 5MB.
-                            </p>
+                            {activeTrip.tripNo || "TRIP ASSIGNMENT"}
+                        </div>
+                        <div className="trip-context-route">
+                            {activeTrip.pickupLocation?.city ||
+                                activeTrip.source ||
+                                "Origin"}{" "}
+                            →{" "}
+                            {activeTrip.deliveryLocation?.city ||
+                                activeTrip.destination ||
+                                "Destination"}
                         </div>
                     </div>
 
-                    {/* Description */}
-                    <div className="form-group">
-                        <label htmlFor="description">Remarks / Description *</label>
-                        <textarea
-                            id="description"
-                            placeholder="Provide details about the expense (e.g. 'Filled 50L diesel at HP pump near Jaipur')"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            required
-                            rows={3}
+                    <div className="trip-context-meta">
+                        <span className="trip-context-tag">
+                            <span className="material-symbols-outlined">
+                                local_shipping
+                            </span>
+                            {activeTrip.truck?.truckNo ||
+                                (typeof activeTrip.truck === "string"
+                                    ? activeTrip.truck
+                                    : "Fleet Truck")}
+                        </span>
+                        {activeTrip.cargo?.type && (
+                            <span className="trip-context-tag">
+                                <span className="material-symbols-outlined">
+                                    inventory_2
+                                </span>
+                                {activeTrip.cargo.type}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            ) : tripsList.length > 0 ? (
+                <div className="db-card" style={{ padding: "16px 20px" }}>
+                    <div className="bill-form-group">
+                        <label htmlFor="selectTrip">Select Assigned Trip *</label>
+                        <select
+                            id="selectTrip"
+                            value={currentTripId}
+                            onChange={(e) => setCurrentTripId(e.target.value)}
                             style={{
                                 width: "100%",
-                                padding: "12px 16px",
+                                padding: "10px 14px",
+                                borderRadius: "10px",
                                 border: "1px solid #cbd5e1",
-                                borderRadius: "12px",
-                                outline: "none",
-                                fontSize: "14px",
-                                fontFamily: "inherit",
-                                boxSizing: "border-box",
-                                resize: "none"
                             }}
-                        />
+                        >
+                            {tripsList.map((t) => (
+                                <option
+                                    key={t._id || t.tripNo}
+                                    value={t._id || t.tripNo}
+                                >
+                                    {t.tripNo} (
+                                    {t.pickupLocation?.city || t.source || "Origin"}{" "}
+                                    →{" "}
+                                    {t.deliveryLocation?.city ||
+                                        t.destination ||
+                                        "Destination"}
+                                    )
+                                </option>
+                            ))}
+                        </select>
                     </div>
+                </div>
+            ) : null}
 
-                    {/* Submit Button */}
+            {/* =====================================================================
+                MULTI-BILL EXPENSE CLAIMS FORM
+               ===================================================================== */}
+            <form onSubmit={handleSubmit} className="driver-bills-form">
+                {/* List of Dynamic Bill Cards */}
+                <div className="driver-bills-list">
+                    {bills.map((bill, index) => (
+                        <div key={bill.id} className="driver-bill-item-card">
+                            {/* Bill Card Header */}
+                            <div className="bill-item-header">
+                                <span className="bill-item-number-chip">
+                                    <span className="material-symbols-outlined">
+                                        receipt_long
+                                    </span>
+                                    Bill #{index + 1}
+                                </span>
+
+                                {/* Remove Button (Shown when more than 1 bill exists) */}
+                                {bills.length > 1 && (
+                                    <button
+                                        type="button"
+                                        className="bill-remove-btn"
+                                        onClick={() => handleRemoveBill(bill.id)}
+                                        title={`Remove Bill #${index + 1}`}
+                                    >
+                                        <span className="material-symbols-outlined">
+                                            delete
+                                        </span>
+                                        Remove
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Bill Card Body */}
+                            <div className="bill-item-body">
+                                <div className="bill-inputs-grid">
+                                    {/* Category / Bill Type */}
+                                    <div className="bill-form-group">
+                                        <label>Expense Category *</label>
+                                        <select
+                                            value={bill.billType}
+                                            onChange={(e) =>
+                                                handleBillFieldChange(
+                                                    bill.id,
+                                                    "billType",
+                                                    e.target.value
+                                                )
+                                            }
+                                            required
+                                        >
+                                            <option value="fule">
+                                                Fuel (Diesel / CNG)
+                                            </option>
+                                            <option value="toll">
+                                                Toll Taxes / Fastag Recharge
+                                            </option>
+                                            <option value="food">
+                                                Food & Daily Meals Allowance
+                                            </option>
+                                            <option value="maintenance">
+                                                Emergency Vehicle Repair / Tyres
+                                            </option>
+                                            <option value="loading">
+                                                Loading
+                                            </option>
+                                            <option value="unloading">
+                                                Unloading
+                                            </option>
+                                            <option value="parking">
+                                                Parking
+                                            </option>
+
+                                            <option value="other">
+                                                Other Miscellaneous
+                                            </option>
+
+                                        </select>
+                                    </div>
+
+                                    {/* Expense Amount */}
+                                    <div className="bill-form-group">
+                                        <label>Expense Amount (INR) *</label>
+                                        <div className="bill-amount-input-wrap">
+                                            <span className="bill-currency-symbol">
+                                                ₹
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                step="any"
+                                                placeholder="e.g. 3500"
+                                                value={bill.amount}
+                                                onChange={(e) =>
+                                                    handleBillFieldChange(
+                                                        bill.id,
+                                                        "amount",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bill-inputs-grid">
+                                    {/* Date of Expense */}
+                                    <div className="bill-form-group">
+                                        <label>Date of Expense *</label>
+                                        <input
+                                            type="date"
+                                            value={bill.billDate}
+                                            onChange={(e) =>
+                                                handleBillFieldChange(
+                                                    bill.id,
+                                                    "billDate",
+                                                    e.target.value
+                                                )
+                                            }
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Upload Receipt / Attachment */}
+                                    <div className="bill-form-group">
+                                        <label>Attach Receipt (Optional)</label>
+                                        <div className="bill-upload-box">
+                                            <input
+                                                type="file"
+                                                accept="image/*,application/pdf"
+                                                onChange={(e) =>
+                                                    handleReceiptFileChange(
+                                                        bill.id,
+                                                        e
+                                                    )
+                                                }
+                                            />
+                                            <div className="bill-upload-content">
+                                                <span className="material-symbols-outlined">
+                                                    cloud_upload
+                                                </span>
+                                                <p className="bill-upload-text">
+                                                    {bill.receiptName ||
+                                                        "Click or drag receipt file"}
+                                                </p>
+                                                <span className="bill-upload-hint">
+                                                    JPEG, PNG, or PDF up to 5MB
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description / Remarks */}
+                                <div className="bill-form-group">
+                                    <label>Remarks / Description *</label>
+                                    <textarea
+                                        rows={2}
+                                        placeholder="Add details (e.g. 'Filled 40L Diesel at HPCL pump' or 'Toll tax paid at toll plaza')"
+                                        value={bill.description}
+                                        onChange={(e) =>
+                                            handleBillFieldChange(
+                                                bill.id,
+                                                "description",
+                                                e.target.value
+                                            )
+                                        }
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* =====================================================================
+                    ACTIONS BAR: Add More Bill, Total Amount, Submit Claim
+                   ===================================================================== */}
+                <div className="driver-bill-actions-bar">
+                    {/* Add More Bills Button */}
                     <button
-                        type="submit"
-                        className="submit-login-btn"
-                        disabled={submitting}
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px"
-                        }}
+                        type="button"
+                        className="btn-add-more-bill"
+                        onClick={handleAddMoreBill}
                     >
-                        {submitting ? (
-                            <>
-                                <span className="material-symbols-outlined animate-spin" style={{ fontSize: "20px" }}>sync</span>
-                                Submitting Bill...
-                            </>
-                        ) : (
-                            <>
-                                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>send</span>
-                                Submit Expense Claim
-                            </>
-                        )}
+                        <span className="material-symbols-outlined">
+                            add_circle
+                        </span>
+                        + Add More Bills
                     </button>
-                </form>
-            </div>
+
+                    {/* Total & Submit */}
+                    <div className="driver-bill-submit-group">
+                        <div className="driver-total-expense-pill">
+                            <span className="driver-total-label">
+                                Total Claims ({bills.length} Bill
+                                {bills.length > 1 ? "s" : ""})
+                            </span>
+                            <span className="driver-total-val">
+                                ₹{totalExpenseAmount.toLocaleString()}
+                            </span>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="btn-submit-bills"
+                            disabled={submitting}
+                        >
+                            {submitting ? (
+                                <>
+                                    <span
+                                        className="material-symbols-outlined animate-spin"
+                                        style={{ fontSize: "18px" }}
+                                    >
+                                        sync
+                                    </span>
+                                    Submitting...
+                                </>
+                            ) : (
+                                <>
+                                    <span className="material-symbols-outlined">
+                                        send
+                                    </span>
+                                    Submit All Bills (₹
+                                    {totalExpenseAmount.toLocaleString()})
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     );
 }

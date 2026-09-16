@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import Message from './Message';
 import axios from 'axios';
 import { useEffect } from 'react';
+
 export default function AddTripForm() {
     const navigate = useNavigate();
     const [freightAmount, setFreigthAmount] = useState(0);
@@ -20,6 +21,7 @@ export default function AddTripForm() {
     const [success, setSuccess] = useState(false);
     const [drivers, setDrivers] = useState([]);
     const [trucks, setTrucks] = useState([]);
+    const [tripNumberError, setTripNumberError] = useState("");
     const [formData, setFormData] = useState({
         tripNumber: "",
         startDate: "",
@@ -42,6 +44,8 @@ export default function AddTripForm() {
         },
         cargoType: "",
         cargoWeight: 0,
+        assignedTruck: "",
+        assignedDriver: "",
         quantity: 0,
         cargovalue: 0,
         cargoDescription: "",
@@ -52,14 +56,146 @@ export default function AddTripForm() {
         notes: "",
 
     });
+    const handleRripNumberChange = (e) => {
+        const value = e.target.value.toUpperCase().trim();
+        setFormData((prev) => ({
+            ...prev,
+            tripNumber: value,
+        }
+        ));
+        const pattern = /^TRIP-[A-Z]{2}-\d{4}$/;
+        if (value && !pattern.test(value)) {
+            setTripNumberError("Trip number must be in the format TRIP-AB-0001");
+        } else {
+            setTripNumberError("");
+        }
+    }
+    const checkTripNumber = async (e) => {
+        const tripNumber = formData.tripNumber;
+        const pattern = /^TRIP-[A-Z]{2}-\d{4}$/;
+        if (!pattern.test(tripNumber)) {
+            return;
+        }
+        try {
+            const res = await axios.get(`http://localhost:8080/owner/trips/check-trip-number/${tripNumber}`, {
+                withCredentials: true,
+            });
+            if (res.data.exists) {
+                setTripNumberError("Trip Number Already Exists");
+            } else {
+                setTripNumberError("");
+            }
+        } catch (err) {
+            console.log(err);
+            setTripNumberError(err.response?.data?.message || "Failed to check trip number");
+        }
+
+    }
     const handleChange = (e) => {
-        const [name, value] = e.target;
+        const { name, value } = e.target;
 
         setFormData((prev) => ({
             ...prev,
             [name]: value
         }))
     };
+    const handleSubmit = async (e) => {
+        const tripData = {
+            tripNo: formData.tripNumber,
+
+            startDate: formData.startDate,
+            endDate: formData.endDate,
+
+            pickupLocation: {
+                address: formData.pickupAddress,
+                city: formData.pickupCity,
+                state: formData.pickupState,
+                pinCode: formData.pickupPinCode,
+                latitude: formData.pickupLatitude,
+                longitude: formData.pickupLongitude
+            },
+
+            deliveryLocation: {
+                address: formData.dropoffAddress,
+                city: formData.dropoffCity,
+                state: formData.dropoffState,
+                pinCode: formData.dropoffPinCode,
+                latitude: formData.dropoffLatitude,
+                longitude: formData.dropoffLongitude
+            },
+
+            cargo: {
+                type: formData.cargoType,
+                weight: formData.cargoWeight,
+                weightUnit: "kg",
+                quantity: formData.quantity,
+                value: formData.cargovalue,
+                description: formData.cargoDescription
+            },
+
+            freightAmount: freightAmount,
+            fuelCost: fuelCost,
+            tollCost: tollCost,
+            otherExpenses: otherExpenses,
+
+            notes: formData.notes,
+
+            truck: formData.assignedTruck,
+            driver: formData.assignedDriver,
+        };
+        e.preventDefault();
+        try {
+            console.log("Assigned Truck:", formData.assignedTruck);
+            console.log("Assigned Driver:", formData.assignedDriver);
+            console.log("Trip Data:", tripData);
+
+            const res = await axios.post("http://localhost:8080/owner/trips/create-trip", tripData, {
+                withCredentials: true,
+            });
+            setSuccess(true);
+            setMessage(res.data.message);
+            setFormData({
+                tripNumber: "",
+                startDate: "",
+                endDate: "",
+                pickupLocation: {
+                    address: "",
+                    city: "",
+                    state: "",
+                    pinCode: "",
+                    latitude: "",
+                    longitude: ""
+                },
+                dropoffLocation: {
+                    address: "",
+                    city: "",
+                    state: "",
+                    pinCode: "",
+                    latitude: "",
+                    longitude: ""
+                },
+                cargoType: "",
+                cargoWeight: 0,
+                quantity: 0,
+                cargovalue: 0,
+                assignedTruck: "",
+                assignedDriver: "",
+                cargoDescription: "",
+                freightAmount: 0,
+                fuelCost: 0,
+                tollCost: 0,
+                otherExpenses: 0,
+                notes: "",
+
+            });
+            navigate("/owner/dashboard");
+            return;
+        } catch (err) {
+            setSuccess(false);
+            setMessage(err.response?.data?.message || "failed to create trip");
+            return;
+        }
+    }
     const getDriver = async () => {
         try {
             const res = await axios.get("http://localhost:8080/owners/available-drivers", {
@@ -122,7 +258,7 @@ export default function AddTripForm() {
                         <p>Enter routing, assignment, cargo, and financial information for the new trip</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="add-trip-form">
+                    <form className="add-trip-form" onSubmit={handleSubmit}>
 
                         {/* Section 1: Trip Information */}
                         <div className="form-section">
@@ -134,11 +270,17 @@ export default function AddTripForm() {
                                         type="text"
                                         id="tripNumber"
                                         name="tripNumber"
-                                        placeholder="TRIP-2026-0001"
+                                        placeholder="TRIP-XX-0000"
                                         value={formData.tripNumber}
-                                        onChange={handleChange}
+                                        onChange={handleRripNumberChange}
+                                        onBlur={checkTripNumber}
                                         required
                                     />
+                                    {tripNumberError && (
+                                        <p className="trip-number-error">
+                                            {tripNumberError}
+                                        </p>
+                                    )}
                                 </div>
 
 
@@ -148,6 +290,7 @@ export default function AddTripForm() {
                                         type="date"
                                         id="startDate"
                                         name="startDate"
+                                        onChange={handleChange}
                                         required
                                     />
                                 </div>
@@ -158,6 +301,7 @@ export default function AddTripForm() {
                                         type="date"
                                         id="endDate"
                                         name="endDate"
+                                        onChange={handleChange}
                                         required
                                     />
                                 </div>
@@ -181,6 +325,7 @@ export default function AddTripForm() {
                                             id="pickupAddress"
                                             name="pickupAddress"
                                             placeholder="e.g. Mumbai Port Terminal 2"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -192,6 +337,7 @@ export default function AddTripForm() {
                                             id="pickupCity"
                                             name="pickupCity"
                                             placeholder="e.g. Mumbai"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -203,6 +349,7 @@ export default function AddTripForm() {
                                             id="pickupState"
                                             name="pickupState"
                                             placeholder="e.g. Maharashtra"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -214,6 +361,7 @@ export default function AddTripForm() {
                                             id="pickupPinCode"
                                             name="pickupPinCode"
                                             placeholder="e.g. 400001"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -226,6 +374,7 @@ export default function AddTripForm() {
                                             id="pickupLatitude"
                                             name="pickupLatitude"
                                             placeholder="e.g. 19.0760"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -238,6 +387,7 @@ export default function AddTripForm() {
                                             id="pickupLongitude"
                                             name="pickupLongitude"
                                             placeholder="e.g. 72.8777"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -259,6 +409,7 @@ export default function AddTripForm() {
                                             id="dropoffAddress"
                                             name="dropoffAddress"
                                             placeholder="e.g. Delhi Cargo Terminal"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -270,6 +421,7 @@ export default function AddTripForm() {
                                             id="dropoffCity"
                                             name="dropoffCity"
                                             placeholder="e.g. Delhi"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -281,6 +433,7 @@ export default function AddTripForm() {
                                             id="dropoffState"
                                             name="dropoffState"
                                             placeholder="e.g. Delhi"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -292,6 +445,7 @@ export default function AddTripForm() {
                                             id="dropoffPinCode"
                                             name="dropoffPinCode"
                                             placeholder="e.g. 110001"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -304,6 +458,7 @@ export default function AddTripForm() {
                                             id="dropoffLatitude"
                                             name="dropoffLatitude"
                                             placeholder="e.g. 28.6139"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -316,6 +471,7 @@ export default function AddTripForm() {
                                             id="dropoffLongitude"
                                             name="dropoffLongitude"
                                             placeholder="e.g. 77.2090"
+                                            onChange={handleChange}
                                             required
                                         />
                                     </div>
@@ -335,6 +491,7 @@ export default function AddTripForm() {
                                         name="assignedTruck"
                                         defaultValue=""
                                         required
+                                        onChange={handleChange}
                                     >
                                         <option value="" disabled>-- Select Truck --</option>
                                         {trucks.map((truck) => (
@@ -350,6 +507,7 @@ export default function AddTripForm() {
                                         name="assignedDriver"
                                         defaultValue=""
                                         required
+                                        onChange={handleChange}
                                     >
                                         <option value="" disabled>-- Select Driver --</option>
                                         {drivers.map((driver) => (
@@ -371,6 +529,7 @@ export default function AddTripForm() {
                                         id="cargoType"
                                         name="cargoType"
                                         placeholder="e.g. Industrial Goods, Electronics"
+                                        onChange={handleChange}
                                         required
                                     />
                                 </div>
@@ -382,6 +541,7 @@ export default function AddTripForm() {
                                         id="cargoWeight"
                                         name="cargoWeight"
                                         placeholder="Weight in kg/tons"
+                                        onChange={handleChange}
                                         min="0"
                                         required
                                     />
@@ -394,6 +554,7 @@ export default function AddTripForm() {
                                         id="quantity"
                                         name="quantity"
                                         placeholder="e.g. 50 boxes"
+                                        onChange={handleChange}
                                         min="1"
                                         required
                                     />
@@ -408,6 +569,7 @@ export default function AddTripForm() {
                                             id="cargoValue"
                                             name="cargoValue"
                                             placeholder="e.g. 15,00,000"
+                                            onChange={handleChange}
                                             min="0"
                                         />
                                     </div>
@@ -420,6 +582,7 @@ export default function AddTripForm() {
                                         id="cargoDescription"
                                         name="cargoDescription"
                                         placeholder="Specify brand, handling instructions..."
+                                        onChange={handleChange}
                                         required
                                     />
                                 </div>
@@ -439,6 +602,7 @@ export default function AddTripForm() {
                                             id="freightAmount"
                                             name="freightAmount"
                                             placeholder="Freight revenue"
+                                            onChange={(e) => setFreigthAmount(e.target.value)}
                                             min="0"
                                             required
                                         />
@@ -520,6 +684,7 @@ export default function AddTripForm() {
                                     id="notes"
                                     name="notes"
                                     rows="3"
+                                    onChange={handleChange}
                                     placeholder="Add any additional information about this trip..."
                                 />
                             </div>

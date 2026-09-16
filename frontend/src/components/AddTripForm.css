@@ -311,3 +311,10 @@
     font-weight: 700;
     color: #2563eb;
 }
+
+.trip-number-error {
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+    margin-bottom: 0;
+}

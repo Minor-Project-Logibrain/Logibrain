@@ -91,41 +91,141 @@ export const verifySignupOtp = async (req, res) => {
     return sendSuccess(res, 200, "Otp verified");
 };
 
-export const loginDriver = async (req, res) => {
-    const result = loginDriverSchema.safeParse(req.body);
-    if (!result.success) {
-        return sendError(res, 400, result.error.errors[0].message);
-    }
-    const { phone, email, password } = result.data;
-    const isNum = /^[6-9][0-9]{9}$/;
-    if (!isNum.test(phone)) {
-        return sendError(res, 400, "The Phone number is incorrect");
-    };
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
-        return sendError(res, 404, "The user dose not existing");
-    };
-    const isPasswordTrue = await bcrypt.compare(password, existingUser.password);
-    if (!isPasswordTrue) {
-        return sendError(res, 401, "The Password is incorrect");
-    };
-    if (existingUser.role === "driver") {
-        const token = generateToken(existingUser._id);
-        setTokenCookie(res, token);
-        return sendSuccess(res, 200, "Diver Logged in successfully");
-    }
-    const otp = generateOtp();
-    const hashedOtp = await bcrypt.hash(otp, BCRYPT_OTP_ROUNDS);
-    await sendOtp(otp, email);
-    await User.updateOne({ email }, {
-        otp: hashedOtp,
-        otpExpiry: Date.now() + OTP_EXPIRY,
-        role: "Driver",
-    });
-    setEmailCookie(res, email);
 
-    return sendSuccess(res, 200, "User is Logged in successfully");
-}
+export const loginDriver = async (req, res) => {
+
+    const result = loginDriverSchema.safeParse(req.body);
+
+    if (!result.success) {
+        return sendError(
+            res,
+            400,
+            result.error.errors[0].message
+        );
+    }
+
+
+    const { phone, email, password } = result.data;
+
+
+    const isNum = /^[6-9][0-9]{9}$/;
+
+
+    if (!isNum.test(phone)) {
+
+        return sendError(
+            res,
+            400,
+            "The Phone number is incorrect"
+        );
+
+    }
+
+
+    const existingUser = await User.findOne({ email });
+
+
+    if (!existingUser) {
+
+        return sendError(
+            res,
+            404,
+            "The user does not exist"
+        );
+
+    }
+
+
+    const isPasswordTrue = await bcrypt.compare(
+        password,
+        existingUser.password
+    );
+
+
+    if (!isPasswordTrue) {
+
+        return sendError(
+            res,
+            401,
+            "The Password is incorrect"
+        );
+
+    }
+
+
+    // USER IS ALREADY A DRIVER
+
+    if (existingUser.role === "Driver") {
+
+        const token = generateToken(
+            existingUser._id
+        );
+
+        setEmailCookie(
+            res,
+            email
+        );
+
+        setTokenCookie(
+            res,
+            token
+        );
+
+        return sendSuccess(
+            res,
+            200,
+            "Driver Logged in successfully"
+        );
+
+    }
+
+
+    // USER IS NOT A DRIVER
+    // SEND OTP
+
+    const otp = generateOtp();
+
+
+    const hashedOtp = await bcrypt.hash(
+        otp,
+        BCRYPT_OTP_ROUNDS
+    );
+
+
+    await sendOtp(
+        otp,
+        email
+    );
+
+
+    await User.updateOne(
+        { email },
+        {
+            otp: hashedOtp,
+
+            otpExpiry:
+                Date.now() + OTP_EXPIRY,
+
+            role: "Driver"
+        }
+    );
+
+
+    setEmailCookie(
+        res,
+        email
+    );
+
+
+    return sendSuccess(
+        res,
+        200,
+        "OTP sent successfully"
+    );
+
+};
+
+
 
 export const loginOwner = async (req, res) => {
     const result = loginOwnerSchema.safeParse(req.body);

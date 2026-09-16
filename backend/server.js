@@ -6,6 +6,8 @@ import userRoutes from "./routes/userRoutes.js";
 import forgotPassRoutes from "./routes/forgotPassRoutes.js";
 import { connectDB } from "./utils/connectMongo.js";
 import ownerRoutes from "./routes/ownerRoutes.js";
+import tripRoutes from "./routes/tripRoutes.js";
+import tripDriverRoutes from "./routes/trip.driverRoutes.js";
 const app = express();
 dotenv.config();
 const port = process.env.PORT;
@@ -27,7 +29,8 @@ app.get("/", (req, res) => {
 app.use("/auth", userRoutes);
 app.use("/forgotPass", forgotPassRoutes);
 app.use("/owners", ownerRoutes);
-
+app.use("/owner/trips", tripRoutes);
+app.use("/driver/trips", tripDriverRoutes);
 app.use((err, req, res, next) => {
     console.log(err);
     res.status(501).json({

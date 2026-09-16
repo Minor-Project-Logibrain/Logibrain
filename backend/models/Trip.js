@@ -14,7 +14,7 @@ const TripSchema = new mongoose.Schema({
     },
     driver: {
         type: mongoose.Schema.ObjectId,
-        ref: "Driver",
+        ref: "User",
         required: true,
     },
     pickupLocation: {
@@ -92,6 +92,10 @@ const TripSchema = new mongoose.Schema({
         type: Date
     },
     cargo: {
+        type: {
+            type: String,
+            required: true,
+        },
         description: {
             type: String,
             required: true,
@@ -109,7 +113,11 @@ const TripSchema = new mongoose.Schema({
         quantity: {
             type: Number,
             default: 1
-        }
+        },
+        value: {
+            type: Number,
+            default: 0
+        },
     },
     freightAmount: {
         type: Number,
