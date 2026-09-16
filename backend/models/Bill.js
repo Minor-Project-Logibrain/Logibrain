@@ -8,11 +8,11 @@ const billSchema = new mongoose.Schema({
     },
     driver: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Driver",
+        ref: "User",
         required: true
     },
     billType: {
-        type: "String",
+        type: String,
         enum: [
             "fuel",
             "toll",
@@ -22,7 +22,8 @@ const billSchema = new mongoose.Schema({
             "loading",
             "unloading",
             "other"
-        ]
+        ],
+        required: true
     },
     amount: {
         type: Number,
@@ -40,8 +41,7 @@ const billSchema = new mongoose.Schema({
     },
     receipt: {
         type: String,
-        default: null,
-        required: true
+        default: "",
     },
     status: {
         type: String,

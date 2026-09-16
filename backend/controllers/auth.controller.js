@@ -317,5 +317,5 @@ export const resendOtpforLogin = async (req, res) => {
 };
 
 export const check = async (req, res) => {
-    return sendSuccess(res, 200, "User is Verified");
-}
+    return sendSuccess(res, 200, "User is Verified", req.user);
+};

@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import Truck from "../models/Truck.js";
+import Trip from "../models/Trip.js";
+import Bill from "../models/Bill.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/response.js";
 import { addDriverSchema, addTruckSchema } from "../Validations/owner.validation.js";
@@ -221,4 +223,117 @@ export const getAvailableTrucks = async (req, res) => {
     const trucks = await Truck.find({ status: "available" });
     if (trucks.length === 0) return sendError(res, 404, "No trucks available");
     return sendSuccess(res, 200, "Available trucks found successfully", trucks);
+};
+
+// BILL / EXPENSES CONTROLLERS
+export const getBills = async (req, res) => {
+    try {
+        const { status, tripId } = req.query;
+        let filter = {};
+        if (status && status !== "all") {
+            filter.status = status;
+        }
+        if (tripId && tripId !== "all" && typeof tripId === "string" && tripId.trim()) {
+            const trimmedTripId = tripId.trim();
+            let foundTrip = null;
+
+            if (/^[0-9a-fA-F]{24}$/.test(trimmedTripId)) {
+                foundTrip = await Trip.findById(trimmedTripId);
+            }
+            if (!foundTrip) {
+                foundTrip = await Trip.findOne({ tripNo: trimmedTripId });
+            }
+
+            if (foundTrip) {
+                filter.trip = foundTrip._id;
+            } else if (/^[0-9a-fA-F]{24}$/.test(trimmedTripId)) {
+                filter.trip = trimmedTripId;
+            } else {
+                return sendSuccess(res, 200, "Bills retrieved successfully", []);
+            }
+        }
+
+        const bills = await Bill.find(filter)
+            .populate({
+                path: "trip",
+                select: "tripNo pickupLocation deliveryLocation truck cargo freightAmount",
+                populate: {
+                    path: "truck",
+                    select: "truckNo"
+                }
+            })
+            .populate("driver", "fullName email phone")
+            .sort({ createdAt: -1 });
+
+        return sendSuccess(res, 200, "Bills retrieved successfully", bills || []);
+    } catch (err) {
+        console.error("Error in getBills:", err);
+        return sendError(res, 500, err.message || "Failed to retrieve bills");
+    }
+};
+
+export const updateBillStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status, rejectionReason } = req.body;
+
+    if (!["approved", "rejected", "pending"].includes(status)) {
+        return sendError(res, 400, "Invalid status. Must be 'approved', 'rejected', or 'pending'");
+    }
+
+    if (status === "rejected" && (!rejectionReason || !rejectionReason.trim())) {
+        return sendError(res, 400, "Cancellation / rejection reason is required when rejecting a bill");
+    }
+
+    const bill = await Bill.findById(id);
+    if (!bill) {
+        return sendError(res, 404, "Bill not found");
+    }
+
+    const previousStatus = bill.status;
+    bill.status = status;
+    bill.rejectionReason = status === "rejected" ? (rejectionReason || "").trim() : "";
+    await bill.save();
+
+    // If status changed to approved, adjust trip expenses
+    if (status === "approved" && previousStatus !== "approved" && bill.trip) {
+        const trip = await Trip.findById(bill.trip);
+        if (trip) {
+            if (bill.billType === "fuel") {
+                trip.fuelCost = (trip.fuelCost || 0) + bill.amount;
+            } else if (bill.billType === "toll") {
+                trip.tollCost = (trip.tollCost || 0) + bill.amount;
+            } else {
+                trip.otherExpenses = (trip.otherExpenses || 0) + bill.amount;
+            }
+            await trip.save();
+        }
+    }
+
+    // If status changed from approved to rejected, deduct from trip expenses
+    if (previousStatus === "approved" && status === "rejected" && bill.trip) {
+        const trip = await Trip.findById(bill.trip);
+        if (trip) {
+            if (bill.billType === "fuel") {
+                trip.fuelCost = Math.max(0, (trip.fuelCost || 0) - bill.amount);
+            } else if (bill.billType === "toll") {
+                trip.tollCost = Math.max(0, (trip.tollCost || 0) - bill.amount);
+            } else {
+                trip.otherExpenses = Math.max(0, (trip.otherExpenses || 0) - bill.amount);
+            }
+            await trip.save();
+        }
+    }
+
+    const populatedBill = await Bill.findById(id)
+        .populate({
+            path: "trip",
+            select: "tripNo pickupLocation deliveryLocation truck cargo",
+            populate: {
+                path: "truck",
+                select: "truckNo"
+            }
+        })
+        .populate("driver", "fullName email phone");
+
+    return sendSuccess(res, 200, `Bill marked as ${status} successfully`, populatedBill);
 };

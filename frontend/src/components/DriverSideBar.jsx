@@ -3,7 +3,7 @@ import "./SideBar.css";
 
 const NAV_ITEMS = [
     { icon: "route", label: "Check Trip", id: "check-trip", section: "operations" },
-    { icon: "payments", label: "Add Bill", id: "add-bill", section: "operations" },
+    { icon: "receipt_long", label: "Bills", id: "bills", section: "operations" },
 ];
 
 const SECTIONS = [

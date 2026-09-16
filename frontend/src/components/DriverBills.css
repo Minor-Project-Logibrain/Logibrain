@@ -1,0 +1,469 @@
+/* =============================================================================
+   DRIVER BILLS PAGE STYLES (DriverBills.css)
+   ============================================================================= */
+
+.driver-bills-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 1. HEADER */
+.driver-bills-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.driver-bills-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.01em;
+}
+
+.driver-bills-header p {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 0;
+}
+
+.driver-bills-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-add-bill-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    transition: all 0.15s ease;
+}
+
+.btn-add-bill-primary:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
+}
+
+/* 2. STATS KPI GRID */
+.driver-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.driver-stat-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.driver-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.driver-stat-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.driver-stat-icon-wrap.all {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.driver-stat-icon-wrap.pending {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.driver-stat-icon-wrap.approved {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.driver-stat-icon-wrap.rejected {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.driver-stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.driver-stat-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.driver-stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+/* 3. TRIP SELECTOR / FILTER BAR */
+.driver-filter-bar {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.driver-filter-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.driver-trip-select {
+    padding: 8px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: #0f172a;
+    background: #f8fafc;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    min-width: 220px;
+    transition: all 0.15s ease;
+}
+
+.driver-trip-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.driver-tabs-pills {
+    display: flex;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.driver-tab-pill {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #64748b;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.driver-tab-pill.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.tab-pill-badge {
+    padding: 1px 6px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tab-pill-badge.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.tab-pill-badge.approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.tab-pill-badge.rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.tab-pill-badge.all {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* 4. ACTIVE TRIP HERO BANNER (WHEN A TRIP IS SELECTED) */
+.driver-selected-trip-hero {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 14px;
+    padding: 18px 22px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+}
+
+.selected-trip-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.selected-trip-badge-box {
+    width: 48px;
+    height: 48px;
+    background: rgba(37, 99, 235, 0.25);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #60a5fa;
+}
+
+.selected-trip-details h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selected-trip-route {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.selected-trip-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-file-bill-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-file-bill-hero:hover {
+    background: #3b82f6;
+    transform: translateY(-1px);
+}
+
+/* 5. BILLS LIST / GRID */
+.driver-bills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+.driver-bill-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.15s ease;
+}
+
+.driver-bill-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e1;
+}
+
+.driver-bill-card.status-border-pending {
+    border-left: 4px solid #f59e0b;
+}
+
+.driver-bill-card.status-border-approved {
+    border-left: 4px solid #10b981;
+}
+
+.driver-bill-card.status-border-rejected {
+    border-left: 4px solid #ef4444;
+}
+
+.driver-bill-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.driver-bill-amount {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.driver-bill-amount span {
+    font-size: 14px;
+    color: #64748b;
+    margin-right: 2px;
+}
+
+.driver-bill-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.driver-bill-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.driver-bill-item-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.driver-bill-item-val {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.driver-bill-remarks {
+    font-size: 12.5px;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 6px;
+    padding: 8px 10px;
+    line-height: 1.4;
+}
+
+.driver-bill-rejection-callout {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #991b1b;
+    font-size: 12.5px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.driver-bill-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 10px;
+}
+
+/* 6. EMPTY STATE */
+.driver-bills-empty {
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    color: #64748b;
+}
+
+.driver-bills-empty .material-symbols-outlined {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+
+.driver-bills-empty h3 {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.driver-bills-empty p {
+    margin: 0 0 18px 0;
+    font-size: 13.5px;
+    color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .driver-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .driver-bills-grid {
+        grid-template-columns: 1fr;
+    }
+}

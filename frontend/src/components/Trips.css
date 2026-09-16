@@ -472,3 +472,188 @@ textarea.form-control {
         padding: 16px;
     }
 }
+
+/* ===== TRIP ROW CLICKABLE & BILLS MODAL STYLES ===== */
+
+.trips-table tbody tr.trip-row-clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.trips-table tbody tr.trip-row-clickable:hover {
+    background-color: #f8fafc;
+}
+
+.trip-table-hint {
+    font-size: 12.5px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+    font-weight: 500;
+}
+
+.btn-view-trip-bills {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-view-trip-bills:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    transform: scale(1.02);
+}
+
+/* Trip Bills Modal Layout */
+.trip-bills-modal {
+    max-width: 850px;
+}
+
+.trip-bills-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+
+.trip-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.trip-meta-item .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.trip-meta-item .val {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Financials Bar */
+.trip-financials-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.trip-fin-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.trip-fin-box .fin-title {
+    font-size: 11.5px;
+    color: #64748b;
+    margin: 0 0 2px;
+    font-weight: 600;
+}
+
+.trip-fin-box .fin-amount {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Modal Bills Section */
+.modal-bills-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 12px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.modal-bills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-bill-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.modal-bill-item.status-pending {
+    border-left: 4px solid #f59e0b;
+}
+
+.modal-bill-item.status-approved {
+    border-left: 4px solid #10b981;
+}
+
+.modal-bill-item.status-rejected {
+    border-left: 4px solid #ef4444;
+}
+
+.modal-bill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.modal-bill-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.modal-bill-desc {
+    font-size: 13px;
+    color: #334155;
+    margin: 0;
+    flex: 1;
+}
+
+.modal-bill-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-bill-empty {
+    text-align: center;
+    padding: 32px 16px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    color: #64748b;
+}
+
+.modal-bill-empty .material-symbols-outlined {
+    font-size: 36px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+

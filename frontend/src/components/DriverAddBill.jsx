@@ -13,12 +13,13 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
     const [currentTripId, setCurrentTripId] = useState(
         selectedTrip?._id || selectedTrip?.tripNo || ""
     );
+    const [fetchingTrips, setFetchingTrips] = useState(false);
 
     // Multi-bill dynamic state array
     const [bills, setBills] = useState([
         {
             id: 1,
-            billType: "Fuel",
+            billType: "fuel",
             amount: "",
             billDate: new Date().toISOString().split("T")[0],
             description: "",
@@ -34,25 +35,31 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
 
     // Fetch assigned trips if needed
     useEffect(() => {
-        if (!selectedTrip) {
-            const fetchTrips = async () => {
-                try {
-                    const res = await axios.get(
-                        "http://localhost:8080/driver/trips/get-trips",
-                        { withCredentials: true }
-                    );
-                    if (res.data.success && res.data.result?.length > 0) {
-                        setTripsList(res.data.result);
+        const fetchTrips = async () => {
+            setFetchingTrips(true);
+            try {
+                const res = await axios.get(
+                    "http://localhost:8080/driver/trips/get-trips",
+                    { withCredentials: true }
+                );
+                if (res.data.success && res.data.result?.length > 0) {
+                    setTripsList(res.data.result);
+                    if (!selectedTrip) {
                         setCurrentTripId(
                             res.data.result[0]._id || res.data.result[0].tripNo
                         );
                     }
-                } catch (err) {
-                    console.error("Failed to fetch assigned trips:", err);
                 }
-            };
-            fetchTrips();
-        } else {
+            } catch (err) {
+                console.error("Failed to fetch assigned trips:", err);
+            } finally {
+                setFetchingTrips(false);
+            }
+        };
+
+        fetchTrips();
+
+        if (selectedTrip) {
             setCurrentTripId(selectedTrip._id || selectedTrip.tripNo);
         }
     }, [selectedTrip]);
@@ -62,7 +69,8 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
         selectedTrip ||
         tripsList.find(
             (t) => t._id === currentTripId || t.tripNo === currentTripId
-        );
+        ) ||
+        (tripsList.length > 0 ? tripsList[0] : null);
 
     // =========================================================================
     // 2. DYNAMIC BILL ITEM HANDLERS (Add More Bills, Remove, Edit)
@@ -73,7 +81,7 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
             ...prev,
             {
                 id: Date.now() + Math.random(),
-                billType: "Fuel",
+                billType: "fuel",
                 amount: "",
                 billDate: new Date().toISOString().split("T")[0],
                 description: "",
@@ -83,7 +91,7 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
         ]);
     };
 
-    // Remove a specific bill card by ID (and vice versa)
+    // Remove a specific bill card by ID
     const handleRemoveBill = (idToRemove) => {
         if (bills.length === 1) return;
         setBills((prev) => prev.filter((b) => b.id !== idToRemove));
@@ -117,10 +125,17 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
     );
 
     // =========================================================================
-    // 3. SUBMIT BILLS HANDLER
+    // 3. SUBMIT BILLS HANDLER (CONNECT TO BACKEND)
     // =========================================================================
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const targetTripId = activeTrip?._id || currentTripId;
+        if (!targetTripId) {
+            setMessage("Please select an assigned trip for filing bills.");
+            setSuccess(false);
+            return;
+        }
 
         // Validate each bill item
         for (let i = 0; i < bills.length; i++) {
@@ -149,27 +164,74 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
         setSubmitting(true);
         setMessage("");
 
-        // Mock API Submission / Trigger
-        setTimeout(() => {
-            setSuccess(true);
-            setMessage(
-                `Successfully submitted ${bills.length} bill${bills.length > 1 ? "s" : ""
-                } (Total: ₹${totalExpenseAmount.toLocaleString()}) for approval!`
-            );
-            // Reset to 1 fresh bill card
-            setBills([
+        try {
+            const formData = new FormData();
+            formData.append("tripId", targetTripId);
+
+            // Prepare bills payload metadata
+            const billsPayload = bills.map((b, idx) => ({
+                id: b.id,
+                billType: (b.billType || "fuel").toLowerCase(),
+                amount: parseFloat(b.amount),
+                date: b.billDate,
+                description: b.description.trim(),
+                receiptName: b.receiptName || "",
+            }));
+
+            formData.append("bills", JSON.stringify(billsPayload));
+
+            // Attach files with indexed fieldnames
+            bills.forEach((b, idx) => {
+                if (b.receipt instanceof File) {
+                    formData.append(`receipt_${idx}`, b.receipt);
+                }
+            });
+
+            const res = await axios.post(
+                "http://localhost:8080/driver/trips/add-bill",
+                formData,
                 {
-                    id: Date.now(),
-                    billType: "Fuel",
-                    amount: "",
-                    billDate: new Date().toISOString().split("T")[0],
-                    description: "",
-                    receipt: null,
-                    receiptName: "",
-                },
-            ]);
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            if (res.data.success) {
+                setSuccess(true);
+                setMessage(
+                    `Successfully submitted ${bills.length} bill${
+                        bills.length > 1 ? "s" : ""
+                    } (Total: ₹${totalExpenseAmount.toLocaleString()}) for approval!`
+                );
+
+                // Reset to 1 fresh bill card
+                setBills([
+                    {
+                        id: Date.now(),
+                        billType: "fuel",
+                        amount: "",
+                        billDate: new Date().toISOString().split("T")[0],
+                        description: "",
+                        receipt: null,
+                        receiptName: "",
+                    },
+                ]);
+            } else {
+                setSuccess(false);
+                setMessage(res.data.message || "Failed to submit bills.");
+            }
+        } catch (err) {
+            console.error("Add bill error:", err);
+            setSuccess(false);
+            setMessage(
+                err.response?.data?.message ||
+                    "Failed to submit bills. Please check connection and try again."
+            );
+        } finally {
             setSubmitting(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -214,6 +276,46 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
             />
 
             {/* =====================================================================
+                TRIP SELECTION (If navigated from sidebar or choosing between trips)
+               ===================================================================== */}
+            {!selectedTrip && tripsList.length > 1 && (
+                <div className="db-card" style={{ padding: "16px 20px", marginBottom: "16px" }}>
+                    <div className="bill-form-group" style={{ marginBottom: 0 }}>
+                        <label htmlFor="selectTrip" style={{ fontWeight: 600, display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#2563eb" }}>
+                                alt_route
+                            </span>
+                            Select Assigned Trip for Expenses:
+                        </label>
+                        <select
+                            id="selectTrip"
+                            value={currentTripId}
+                            onChange={(e) => setCurrentTripId(e.target.value)}
+                            style={{
+                                width: "100%",
+                                padding: "10px 14px",
+                                borderRadius: "8px",
+                                border: "1px solid #cbd5e1",
+                                fontSize: "14px",
+                                marginTop: "6px",
+                            }}
+                        >
+                            {tripsList.map((t) => (
+                                <option
+                                    key={t._id || t.tripNo}
+                                    value={t._id || t.tripNo}
+                                >
+                                    {t.tripNo} — {t.pickupLocation?.city || t.source || "Origin"} →{" "}
+                                    {t.deliveryLocation?.city || t.destination || "Destination"} (
+                                    {t.truck?.truckNo || "Assigned Truck"})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            )}
+
+            {/* =====================================================================
                 ASSIGNED TRIP CONTEXT CARD
                ===================================================================== */}
             {activeTrip ? (
@@ -255,39 +357,40 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
                                 {activeTrip.cargo.type}
                             </span>
                         )}
+                        <span className="trip-context-tag">
+                            <span className="material-symbols-outlined">
+                                event
+                            </span>
+                            {activeTrip.plannedStartDate || activeTrip.startDate
+                                ? new Date(
+                                      activeTrip.plannedStartDate ||
+                                          activeTrip.startDate
+                                  ).toLocaleDateString()
+                                : "Active"}
+                        </span>
                     </div>
                 </div>
-            ) : tripsList.length > 0 ? (
-                <div className="db-card" style={{ padding: "16px 20px" }}>
-                    <div className="bill-form-group">
-                        <label htmlFor="selectTrip">Select Assigned Trip *</label>
-                        <select
-                            id="selectTrip"
-                            value={currentTripId}
-                            onChange={(e) => setCurrentTripId(e.target.value)}
-                            style={{
-                                width: "100%",
-                                padding: "10px 14px",
-                                borderRadius: "10px",
-                                border: "1px solid #cbd5e1",
-                            }}
-                        >
-                            {tripsList.map((t) => (
-                                <option
-                                    key={t._id || t.tripNo}
-                                    value={t._id || t.tripNo}
-                                >
-                                    {t.tripNo} (
-                                    {t.pickupLocation?.city || t.source || "Origin"}{" "}
-                                    →{" "}
-                                    {t.deliveryLocation?.city ||
-                                        t.destination ||
-                                        "Destination"}
-                                    )
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+            ) : !fetchingTrips && tripsList.length === 0 ? (
+                <div
+                    className="db-card"
+                    style={{
+                        padding: "24px",
+                        textAlign: "center",
+                        marginBottom: "20px",
+                    }}
+                >
+                    <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "36px", color: "#94a3b8" }}
+                    >
+                        warning
+                    </span>
+                    <h3 style={{ margin: "8px 0 4px", color: "#334155" }}>
+                        No Active Trips Assigned
+                    </h3>
+                    <p style={{ color: "#64748b", margin: 0, fontSize: "14px" }}>
+                        You need to be assigned to a trip by the fleet owner before you can submit expense claims.
+                    </p>
                 </div>
             ) : null}
 
@@ -341,7 +444,7 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
                                             }
                                             required
                                         >
-                                            <option value="fule">
+                                            <option value="fuel">
                                                 Fuel (Diesel / CNG)
                                             </option>
                                             <option value="toll">
@@ -354,19 +457,17 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
                                                 Emergency Vehicle Repair / Tyres
                                             </option>
                                             <option value="loading">
-                                                Loading
+                                                Loading Charges
                                             </option>
                                             <option value="unloading">
-                                                Unloading
+                                                Unloading Charges
                                             </option>
                                             <option value="parking">
-                                                Parking
+                                                Parking Charges
                                             </option>
-
                                             <option value="other">
                                                 Other Miscellaneous
                                             </option>
-
                                         </select>
                                     </div>
 
@@ -497,7 +598,7 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
                         <button
                             type="submit"
                             className="btn-submit-bills"
-                            disabled={submitting}
+                            disabled={submitting || (!activeTrip && tripsList.length === 0)}
                         >
                             {submitting ? (
                                 <>
@@ -525,3 +626,4 @@ export default function DriverAddBill({ selectedTrip, onBack }) {
         </div>
     );
 }
+

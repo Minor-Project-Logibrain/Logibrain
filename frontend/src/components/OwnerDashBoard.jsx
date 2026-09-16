@@ -7,6 +7,7 @@ import Drivers from "./Drivers";
 import Dashboard from "./DashBoard";
 import Trucks from "./Trucks";
 import Trips from "./Trips";
+import OwnerExpenses from "./OwnerExpenses";
 
 export default function OwnerDashboard() {
     const [activeNav, setActiveNav] = useState("dashboard");
@@ -26,9 +27,8 @@ export default function OwnerDashboard() {
                 {activeNav === "dashboard" && <Dashboard />}
                 {activeNav === "drivers" && <Drivers />}
                 {activeNav === "trucks" && <Trucks />}
-                {activeNav === "trips" && <Trips />}
-
-
+                {activeNav === "trips" && <Trips onNavigateExpenses={() => setActiveNav("expenses")} />}
+                {activeNav === "expenses" && <OwnerExpenses />}
             </main>
 
         </div>

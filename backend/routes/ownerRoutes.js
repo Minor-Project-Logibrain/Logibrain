@@ -1,4 +1,17 @@
-import { getDrivers, addDrivers, updateDriver, deleteDriver, getTrucks, addTruck, updateTruck, deleteTruck, getAvailableDrivers, getAvailableTrucks } from "../controllers/owner.controller.js";
+import {
+    getDrivers,
+    addDrivers,
+    updateDriver,
+    deleteDriver,
+    getTrucks,
+    addTruck,
+    updateTruck,
+    deleteTruck,
+    getAvailableDrivers,
+    getAvailableTrucks,
+    getBills,
+    updateBillStatus
+} from "../controllers/owner.controller.js";
 import errorHandler from "../utils/ExpressError.js";
 import { Router } from "express";
 import { hasToken } from "../middleware/hastoken.js";
@@ -18,5 +31,9 @@ router.post("/add-truck", hasToken, isAdmin, upload.single("img"), errorHandler(
 router.put("/trucks/:id", hasToken, isAdmin, upload.single("img"), errorHandler(updateTruck));
 router.delete("/trucks/:id", hasToken, isAdmin, errorHandler(deleteTruck));
 router.get("/available-trucks", hasToken, isAdmin, errorHandler(getAvailableTrucks));
+
+// BILL / EXPENSE ROUTES
+router.get("/bills", hasToken, isAdmin, errorHandler(getBills));
+router.put("/bills/:id/status", hasToken, isAdmin, errorHandler(updateBillStatus));
 
 export default router;

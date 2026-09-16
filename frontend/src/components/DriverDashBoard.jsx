@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import DriverNavBar from "./DriverNavBar";
 import DriverSideBar from "./DriverSideBar";
 import DriverCheckTrip from "./DriverCheckTrip";
-import DriverAddBill from "./DriverAddBill";
+import DriverBills from "./DriverBills";
 import "./OwnerDashBoard.css";
 
 export default function DriverDashBoard() {
     const [activeNav, setActiveNav] = useState("check-trip");
     const [selectedTrip, setSelectedTrip] = useState(null);
 
-    // Handler when driver clicks a trip or "Add Bill" button from the trips table
-    const handleOpenAddBill = (trip) => {
+    // Handler when driver clicks a trip to view its bills
+    const handleOpenTripBills = (trip) => {
         setSelectedTrip(trip);
-        setActiveNav("add-bill");
+        setActiveNav("bills");
     };
 
     // Handler to go back to trips list
@@ -29,12 +29,12 @@ export default function DriverDashBoard() {
 
             <main className="dashboard-content">
                 {activeNav === "check-trip" && (
-                    <DriverCheckTrip onAddBill={handleOpenAddBill} />
+                    <DriverCheckTrip onAddBill={handleOpenTripBills} />
                 )}
-                {activeNav === "add-bill" && (
-                    <DriverAddBill
-                        selectedTrip={selectedTrip}
-                        onBack={handleBackToTrips}
+                {activeNav === "bills" && (
+                    <DriverBills
+                        initialTrip={selectedTrip}
+                        onNavigateCheckTrip={handleBackToTrips}
                     />
                 )}
             </main>

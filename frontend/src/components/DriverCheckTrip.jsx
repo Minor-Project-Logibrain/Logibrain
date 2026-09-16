@@ -207,7 +207,7 @@ export default function DriverCheckTrip({ onAddBill }) {
                                                 </span>
                                             </td>
 
-                                            {/* Action: Add Bill Button */}
+                                            {/* Action: View Bills Button */}
                                             <td className="driver-td-action">
                                                 <button
                                                     type="button"
@@ -216,12 +216,12 @@ export default function DriverCheckTrip({ onAddBill }) {
                                                         e.stopPropagation();
                                                         handleTripClick(trip);
                                                     }}
-                                                    title={`Add bill for ${trip.tripNo}`}
+                                                    title={`View & file bills for ${trip.tripNo}`}
                                                 >
                                                     <span className="material-symbols-outlined">
                                                         receipt_long
                                                     </span>
-                                                    Add Bill
+                                                    Bills
                                                 </button>
                                             </td>
                                         </tr>
